@@ -1,0 +1,2080 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>FC MatiLuki — Football Manager</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --red:#CC2222;--red-light:#E83333;--red-dark:#991A1A;
+  --blue:#1A3ECC;--blue-light:#2B54E8;--blue-dark:#0F2699;
+  --gold:#F0B429;--gold-light:#FFD060;
+  --bg:#0A0C14;--bg3:#181C2E;
+  --surface:#222640;--surface2:#2A2F4E;
+  --border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.14);
+  --text:#F0EEF8;--text2:#9B97B8;--text3:#5A5675;--green:#22C55E;
+  --font-display:'Bebas Neue',sans-serif;
+  --font-body:'Barlow',sans-serif;
+  --font-cond:'Barlow Condensed',sans-serif;
+  --radius:12px;--radius-sm:8px;--radius-lg:18px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:16px;scroll-behavior:smooth}
+body{font-family:var(--font-body);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:0;opacity:.5;}
+body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(26,62,204,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(26,62,204,0.04) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;min-height:100vh;}
+.screen{display:none;min-height:100vh;}
+.screen.active{display:flex;flex-direction:column;}
+.header{display:flex;align-items:center;gap:12px;padding:16px 20px;background:linear-gradient(135deg,rgba(204,34,34,0.15),rgba(26,62,204,0.15));border-bottom:1px solid var(--border2);backdrop-filter:blur(10px);position:sticky;top:0;z-index:100;}
+.badge{width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,var(--red) 50%,var(--blue) 50%);border:2px solid rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 4px 20px rgba(204,34,34,0.4);}
+.badge svg{width:28px;height:28px;}
+.header-title{flex:1;}
+.header-title h1{font-family:var(--font-display);font-size:22px;letter-spacing:1px;background:linear-gradient(90deg,#fff,var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1;}
+.header-title p{font-size:11px;color:var(--text2);font-family:var(--font-cond);letter-spacing:2px;margin-top:2px;}
+.btn{font-family:var(--font-cond);font-weight:700;letter-spacing:1.5px;font-size:14px;padding:12px 24px;border-radius:var(--radius-sm);border:none;cursor:pointer;transition:all .2s;text-transform:uppercase;display:inline-flex;align-items:center;gap:8px;justify-content:center;}
+.btn-primary{background:linear-gradient(135deg,var(--red),var(--red-dark));color:#fff;box-shadow:0 4px 20px rgba(204,34,34,0.4);}
+.btn-primary:hover{transform:translateY(-2px);}
+.btn-secondary{background:linear-gradient(135deg,var(--blue),var(--blue-dark));color:#fff;}
+.btn-secondary:hover{transform:translateY(-2px);}
+.btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--border2);}
+.btn-ghost:hover{background:var(--surface);color:var(--text);}
+.btn-gold{background:linear-gradient(135deg,var(--gold),#E09000);color:#1a1000;box-shadow:0 4px 20px rgba(240,180,41,0.4);}
+.btn-sm{padding:8px 16px;font-size:12px;}
+.btn-block{width:100%;}
+.card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:20px;}
+.card-sm{padding:14px;}
+
+/* WELCOME */
+#screen-welcome{background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(204,34,34,0.18),transparent 70%),var(--bg);justify-content:center;align-items:center;padding:40px 20px;text-align:center;gap:32px;}
+.welcome-logo{width:120px;height:120px;border-radius:50%;background:linear-gradient(135deg,var(--red) 50%,var(--blue) 50%);border:3px solid rgba(255,255,255,0.15);display:flex;flex-direction:column;align-items:center;justify-content:center;margin:0 auto;box-shadow:0 0 60px rgba(204,34,34,0.5),0 0 120px rgba(26,62,204,0.3);animation:pulse-badge 3s ease-in-out infinite;}
+@keyframes pulse-badge{0%,100%{box-shadow:0 0 60px rgba(204,34,34,0.5),0 0 120px rgba(26,62,204,0.3);}50%{box-shadow:0 0 80px rgba(204,34,34,0.7),0 0 150px rgba(26,62,204,0.45);}}
+.welcome-logo svg{width:60px;height:60px;}
+.welcome-logo span{font-family:var(--font-display);font-size:11px;color:#fff;letter-spacing:1px;margin-top:2px;}
+.welcome-title{font-family:var(--font-display);font-size:clamp(36px,10vw,64px);letter-spacing:3px;background:linear-gradient(180deg,#fff,var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:.95;}
+.welcome-sub{font-family:var(--font-cond);font-size:13px;color:var(--text2);letter-spacing:3px;text-transform:uppercase;margin-top:8px;}
+.welcome-desc{max-width:380px;font-size:15px;color:var(--text2);line-height:1.6;}
+.welcome-stats{display:flex;gap:24px;justify-content:center;flex-wrap:wrap;}
+.stat-pill{background:var(--surface);border:1px solid var(--border2);border-radius:40px;padding:10px 20px;display:flex;flex-direction:column;align-items:center;}
+.stat-pill strong{font-family:var(--font-display);font-size:24px;color:var(--gold);}
+.stat-pill span{font-size:10px;color:var(--text3);font-family:var(--font-cond);letter-spacing:2px;text-transform:uppercase;}
+
+/* SETUP */
+#screen-setup{padding:0;overflow-y:auto;}
+.setup-body{padding:20px;display:flex;flex-direction:column;gap:20px;max-width:600px;margin:0 auto;width:100%;}
+.section-title{font-family:var(--font-display);font-size:20px;color:var(--text);letter-spacing:1px;display:flex;align-items:center;gap:10px;padding-bottom:12px;border-bottom:1px solid var(--border);}
+.section-title::before{content:'';width:4px;height:20px;background:linear-gradient(180deg,var(--red),var(--blue));border-radius:2px;}
+.manager-count{display:flex;gap:10px;flex-wrap:wrap;}
+.count-btn{flex:1;min-width:50px;padding:14px 8px;background:var(--surface);border:2px solid var(--border);border-radius:var(--radius-sm);color:var(--text2);font-family:var(--font-display);font-size:22px;cursor:pointer;transition:all .2s;text-align:center;}
+.count-btn:hover{border-color:var(--blue);color:var(--text);}
+.count-btn.selected{border-color:var(--gold);color:var(--gold);background:rgba(240,180,41,0.1);}
+.manager-inputs{display:flex;flex-direction:column;gap:10px;}
+.input-group{display:flex;flex-direction:column;gap:6px;}
+.input-group label{font-size:12px;color:var(--text2);font-family:var(--font-cond);letter-spacing:1.5px;text-transform:uppercase;}
+.input-group input{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:12px 16px;color:var(--text);font-family:var(--font-body);font-size:15px;outline:none;transition:border .2s;}
+.input-group input:focus{border-color:var(--blue-light);}
+.input-group input::placeholder{color:var(--text3);}
+
+/* GAME */
+#screen-game{overflow-y:auto;}
+.game-layout{display:grid;gap:16px;padding:16px;}
+@media(min-width:900px){
+  .game-layout{
+    display:grid;
+    grid-template-columns:320px 1fr;
+    gap:16px;
+    padding:16px;
+  }
+  .game-sidebar-col{order:unset;gap:14px;}
+  .game-pitch-col{order:unset;}
+  /* On desktop, mob-section wrappers act as plain card-sm */
+  .mob-section{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);}
+  .mob-section-body{display:block!important;padding:2px 14px 14px;}
+  .mob-section-hdr{cursor:default;pointer-events:none;padding:12px 14px 8px;}
+  .mob-section-hdr .mob-label{
+    font-size:11px;color:var(--text3);font-family:var(--font-cond);
+    letter-spacing:2px;text-transform:uppercase;
+  }
+  .mob-chevron{display:none;}
+  .mob-badge{display:none;}
+  /* Action bar: normal flow on desktop, no sticky */
+  .game-action-bar{
+    position:static!important;
+    background:transparent!important;
+    border-top:none!important;
+    padding:0!important;
+    margin:12px 0 0!important;
+    backdrop-filter:none!important;
+    -webkit-backdrop-filter:none!important;
+  }
+  .game-action-bar .btn{flex:unset!important;}
+}
+.turn-bar{background:linear-gradient(135deg,rgba(204,34,34,0.2),rgba(26,62,204,0.2));border:1px solid var(--border2);border-radius:var(--radius);padding:14px 16px;display:flex;align-items:center;gap:12px;}
+.turn-avatar{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--red),var(--blue));display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:18px;color:#fff;flex-shrink:0;}
+.turn-info{flex:1;}
+.turn-info strong{font-family:var(--font-cond);font-weight:700;font-size:16px;letter-spacing:.5px;}
+.turn-info span{display:block;font-size:12px;color:var(--text2);}
+.turn-badge{background:var(--gold);color:#1a1000;font-family:var(--font-cond);font-weight:700;font-size:11px;letter-spacing:2px;padding:4px 10px;border-radius:20px;text-transform:uppercase;}
+.formation-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.form-btn{padding:10px 4px;background:var(--surface);border:2px solid var(--border);border-radius:var(--radius-sm);color:var(--text2);font-family:var(--font-cond);font-weight:700;font-size:14px;cursor:pointer;transition:all .2s;text-align:center;}
+.form-btn:hover{border-color:var(--blue-light);color:var(--text);}
+.form-btn.selected{border-color:var(--gold);color:var(--gold);background:rgba(240,180,41,0.1);}
+
+/* PITCH */
+.pitch-container{background:radial-gradient(ellipse 100% 50% at 50% 0%,rgba(34,197,94,0.06),transparent 60%),var(--bg3);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;}
+.pitch-zones{display:flex;flex-direction:column;gap:2px;padding:14px 10px;}
+.pitch-zone{display:flex;justify-content:center;gap:6px;flex-wrap:wrap;padding:6px 0;}
+.pitch-zone-label{font-size:10px;color:var(--text3);font-family:var(--font-cond);letter-spacing:2px;text-transform:uppercase;text-align:center;margin-bottom:4px;}
+
+/* SLOT */
+.position-slot{width:72px;min-height:88px;background:rgba(255,255,255,0.04);border:1.5px dashed var(--border2);border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:2px;cursor:pointer;transition:all .2s;padding:5px 3px;text-align:center;}
+.position-slot:hover{border-color:var(--gold);background:rgba(240,180,41,0.06);}
+.position-slot.filled{border-style:solid;border-color:rgba(34,197,94,0.5);background:rgba(34,197,94,0.04);}
+.position-slot.filled:hover{border-color:var(--red-light);background:rgba(204,34,34,0.08);}
+.slot-pos{font-family:var(--font-display);font-size:11px;color:var(--text3);letter-spacing:.5px;}
+.slot-name{font-family:var(--font-cond);font-size:9px;font-weight:600;color:var(--text);max-width:68px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.2;}
+.slot-pts{font-size:9px;color:var(--gold);font-family:var(--font-cond);font-weight:700;}
+.slot-empty-icon{font-size:20px;opacity:.2;margin-top:8px;}
+
+/* PLAYER PHOTO — pitch */
+.slot-photo{width:44px;height:44px;border-radius:50%;overflow:hidden;border:2px solid rgba(34,197,94,0.5);flex-shrink:0;background:var(--surface);display:flex;align-items:center;justify-content:center;}
+.slot-photo img{width:100%;height:100%;object-fit:cover;object-position:center top;}
+.slot-photo .ph-init{font-family:var(--font-display);font-size:16px;color:var(--text2);}
+
+/* PLAYER PHOTO — modal */
+.pl-photo{width:50px;height:50px;border-radius:50%;overflow:hidden;flex-shrink:0;background:var(--surface2);display:flex;align-items:center;justify-content:center;border:2px solid var(--border2);}
+.pl-photo img{width:100%;height:100%;object-fit:cover;object-position:center top;}
+.pl-photo .ph-init{font-family:var(--font-display);font-size:18px;color:var(--text2);}
+
+/* SHIMMER */
+.loading-photo{background:linear-gradient(90deg,var(--surface) 25%,var(--surface2) 50%,var(--surface) 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;}
+@keyframes shimmer{0%{background-position:200% 0;}100%{background-position:-200% 0;}}
+
+/* Points reveal animation */
+@keyframes pts-pop{
+  0%{transform:scale(0.4);opacity:0;}
+  60%{transform:scale(1.3);}
+  100%{transform:scale(1);opacity:1;}
+}
+@keyframes score-count{
+  0%{opacity:0;transform:scale(.7);}
+  70%{transform:scale(1.15);}
+  100%{opacity:1;transform:scale(1);}
+}
+
+/* TEAM SCORE */
+.team-score-bar{background:var(--surface);border-radius:var(--radius-sm);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;border:1px solid var(--border);}
+.team-score-label{font-size:12px;color:var(--text2);font-family:var(--font-cond);letter-spacing:1px;}
+.team-score-num{font-family:var(--font-display);font-size:28px;background:linear-gradient(90deg,var(--gold),var(--gold-light));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.progress-bar{background:var(--surface);border-radius:20px;height:6px;overflow:hidden;}
+.progress-fill{height:100%;border-radius:20px;background:linear-gradient(90deg,var(--red),var(--blue));transition:width .4s ease;}
+.team-tabs{display:flex;gap:6px;flex-wrap:wrap;}
+.team-tab{padding:8px 14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);font-family:var(--font-cond);font-size:13px;font-weight:600;letter-spacing:.5px;cursor:pointer;transition:all .15s;color:var(--text2);}
+.team-tab:hover{color:var(--text);}
+.team-tab.active{border-color:var(--gold);color:var(--gold);background:rgba(240,180,41,.08);}
+.team-tab.complete{border-color:rgba(34,197,94,.4);color:#4ade80;}
+.leaderboard{display:flex;flex-direction:column;gap:8px;}
+.lb-row{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;}
+.lb-row.current-player{border-color:rgba(240,180,41,.4);background:rgba(240,180,41,.06);}
+.lb-rank{font-family:var(--font-display);font-size:20px;color:var(--text3);width:24px;text-align:center;}
+.lb-rank.r1{color:var(--gold);}.lb-rank.r2{color:#c0c0c0;}.lb-rank.r3{color:#cd7f32;}
+.lb-name{flex:1;font-weight:600;font-size:14px;}
+.lb-teams{font-size:11px;color:var(--text2);font-family:var(--font-cond);}
+.lb-pts{font-family:var(--font-display);font-size:22px;color:var(--gold);}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.82);backdrop-filter:blur(6px);display:flex;align-items:flex-end;justify-content:center;}
+@media(min-width:600px){.modal-overlay{align-items:center;}}
+.modal{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-lg) var(--radius-lg) 0 0;width:100%;max-width:520px;max-height:88vh;overflow-y:auto;animation:slide-up .28s ease;}
+@media(min-width:600px){.modal{border-radius:var(--radius-lg);max-height:80vh;}}
+@keyframes slide-up{from{transform:translateY(100%);}to{transform:translateY(0);}}
+.modal-handle{width:36px;height:4px;background:var(--border2);border-radius:2px;margin:12px auto 0;}
+.modal-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--bg3);z-index:5;}
+.modal-header h3{font-family:var(--font-cond);font-weight:700;font-size:18px;}
+.modal-search{padding:12px 20px;position:sticky;top:57px;background:var(--bg3);z-index:4;}
+.modal-search input{width:100%;background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:10px 14px;color:var(--text);font-size:15px;outline:none;font-family:var(--font-body);}
+.modal-search input:focus{border-color:var(--blue-light);}
+.player-list{padding:8px 16px 24px;}
+.player-item{display:flex;align-items:center;gap:12px;padding:10px 10px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .15s;border-radius:var(--radius-sm);margin:0 -10px;}
+.player-item:hover:not(.taken){background:var(--surface);}
+.player-item.taken{opacity:.38;cursor:not-allowed;pointer-events:none;}
+.player-info{flex:1;min-width:0;}
+.player-info strong{font-size:14px;display:block;font-weight:600;}
+.player-info span{font-size:11px;color:var(--text2);font-family:var(--font-cond);}
+.player-pts{text-align:right;}
+.player-pts strong{font-family:var(--font-display);font-size:18px;color:var(--gold);display:block;}
+.player-pts span{font-size:10px;color:var(--text3);font-family:var(--font-cond);}
+.tier-badge{font-size:10px;font-family:var(--font-cond);font-weight:700;letter-spacing:1px;padding:2px 7px;border-radius:20px;display:inline-block;}
+.tier-S{background:rgba(240,180,41,.2);color:var(--gold);}
+.tier-A{background:rgba(34,197,94,.15);color:#4ade80;}
+.tier-B{background:rgba(96,165,250,.15);color:#93c5fd;}
+
+/* RESULTS */
+#screen-results{padding:0;overflow-y:auto;background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(240,180,41,0.12),transparent 70%),var(--bg);}
+.results-body{padding:20px;max-width:600px;margin:0 auto;}
+.trophy-area{text-align:center;padding:40px 20px;}
+.trophy{font-size:72px;display:block;margin-bottom:16px;animation:trophy-bounce .6s ease infinite alternate;}
+@keyframes trophy-bounce{from{transform:scale(1) rotate(-3deg);}to{transform:scale(1.08) rotate(3deg);}}
+.winner-name{font-family:var(--font-display);font-size:clamp(28px,8vw,48px);background:linear-gradient(90deg,var(--gold),var(--gold-light));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.winner-score{font-family:var(--font-display);font-size:20px;color:var(--text2);letter-spacing:2px;}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius);padding:12px 20px;font-family:var(--font-cond);font-size:14px;font-weight:600;letter-spacing:.5px;z-index:500;transition:transform .3s ease;max-width:90vw;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,0.4);}
+.toast.show{transform:translateX(-50%) translateY(0);}
+.toast.success{border-color:var(--green);color:var(--green);}
+.toast.error{border-color:var(--red-light);color:var(--red-light);}
+::-webkit-scrollbar{width:4px;height:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--surface2);border-radius:2px;}
+@media(max-width:400px){.position-slot{width:62px;}.slot-photo{width:38px;height:38px;}}
+
+/* ═══════════════════════════════════════
+   MOBILE RESPONSIVE — full overhaul
+   ═══════════════════════════════════════ */
+
+/* ── Compact header on small screens ── */
+@media(max-width:599px){
+  .header{padding:9px 12px;gap:8px;}
+  .header-title h1{font-size:17px;letter-spacing:.5px;}
+  .header-title p{font-size:9px;letter-spacing:1.5px;}
+  .badge{width:36px;height:36px;}
+  .badge svg{width:20px;height:20px;}
+  .btn-sm{padding:6px 10px;font-size:11px;}
+}
+
+/* ── Welcome screen ── */
+@media(max-width:480px){
+  #screen-welcome{padding:28px 16px;gap:22px;}
+  .welcome-logo{width:96px;height:96px;}
+  .welcome-logo svg{width:48px;height:48px;}
+  .welcome-stats{gap:10px;}
+  .stat-pill{padding:8px 14px;}
+  .stat-pill strong{font-size:20px;}
+  .welcome-desc{font-size:14px;}
+}
+
+/* ── Setup screen ── */
+@media(max-width:480px){
+  .setup-body{padding:14px;gap:14px;}
+  .count-btn{font-size:18px;padding:12px 6px;}
+}
+
+/* ── GAME SCREEN — main mobile layout ── */
+@media(max-width:899px){
+
+  /* Flex column; pitch comes FIRST via order */
+  .game-layout{
+    display:flex;
+    flex-direction:column;
+    padding:10px;
+    gap:10px;
+  }
+  .game-sidebar-col{order:2;}
+  .game-pitch-col{order:1;}
+
+  /* Sidebar top strip (turn bar stays visible) */
+  .turn-bar{padding:10px 12px;gap:8px;}
+  .turn-avatar{width:34px;height:34px;font-size:15px;}
+  .turn-info strong{font-size:14px;}
+  .turn-info span{font-size:11px;}
+  .turn-badge{font-size:10px;padding:3px 8px;}
+
+  /* Collapsible sidebar sections */
+  .mob-section{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);}
+  .mob-section-hdr{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:10px 14px;cursor:pointer;user-select:none;
+  }
+  .mob-section-hdr .mob-label{
+    font-family:var(--font-cond);font-size:11px;font-weight:700;
+    letter-spacing:2px;text-transform:uppercase;color:var(--text2);
+  }
+  .mob-section-hdr .mob-badge{
+    font-family:var(--font-cond);font-size:11px;font-weight:700;
+    color:var(--gold);letter-spacing:.5px;
+  }
+  .mob-chevron{font-size:10px;color:var(--text3);transition:transform .2s;margin-left:6px;}
+  .mob-section.open .mob-chevron{transform:rotate(180deg);}
+  .mob-section-body{display:none;padding:0 10px 12px;}
+  .mob-section.open .mob-section-body{display:block;}
+
+  /* Pitch tweaks */
+  .pitch-zones{padding:10px 6px;gap:1px;}
+  .pitch-zone{gap:4px;}
+  .position-slot{width:64px;min-height:82px;padding:4px 2px;}
+  .slot-photo{width:38px;height:38px;}
+  .pitch-zone-label{font-size:9px;letter-spacing:1.5px;margin-bottom:3px;}
+
+  /* Sticky action bar */
+  .game-action-bar{
+    position:sticky;
+    bottom:0;
+    background:rgba(10,12,20,.96);
+    backdrop-filter:blur(14px);
+    -webkit-backdrop-filter:blur(14px);
+    border-top:1px solid var(--border2);
+    padding:10px 12px;
+    display:flex;
+    gap:8px;
+    z-index:90;
+    margin:0 -10px;   /* bleed to edges */
+  }
+  .game-action-bar .btn{flex:1;font-size:12px;padding:11px 10px;}
+
+  /* Team tabs wrap */
+  .team-tabs{flex-wrap:wrap;gap:5px;}
+  .team-tab{padding:7px 12px;font-size:12px;}
+
+  /* Formation grid stays 3 cols but smaller */
+  .form-btn{padding:9px 2px;font-size:13px;}
+
+  /* Score bar compact */
+  .team-score-bar{padding:10px 12px;}
+  .team-score-num{font-size:24px;}
+  .team-score-label{font-size:11px;}
+}
+
+/* ── Very small screens (≤360px) ── */
+@media(max-width:360px){
+  .game-layout{padding:8px;}
+  .position-slot{width:54px;min-height:74px;}
+  .slot-photo{width:32px;height:32px;}
+  .pitch-zone{gap:2px;}
+  .formation-grid{grid-template-columns:repeat(3,1fr);gap:5px;}
+  .form-btn{font-size:12px;padding:8px 1px;}
+}
+
+/* ── Results screen ── */
+@media(max-width:480px){
+  .trophy-area{padding:28px 16px;}
+  .trophy{font-size:56px;}
+  .results-body{padding:14px;}
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+<div id="screen-welcome" class="screen active">
+  <div class="welcome-logo">
+    <svg viewBox="0 0 60 60" fill="none"><circle cx="30" cy="30" r="28" stroke="rgba(255,255,255,0.3)" stroke-width="1.5"/><circle cx="30" cy="30" r="18" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="1.5"/><polygon points="30,12 34,22 44,22 36,28 39,38 30,32 21,38 24,28 16,22 26,22" fill="white" opacity="0.9"/></svg>
+    <span>FC MATILUKI</span>
+  </div>
+  <div><div class="welcome-title">FOOTBALL<br>MANAGER</div><div class="welcome-sub">FC MatiLuki · Sezon 2025/26</div></div>
+  <p class="welcome-desc">Rywalizuj z innymi menedżerami. Buduj 5 drużyn z prawdziwych piłkarzy europejskich lig. Wygrywa najwyższa suma punktów rankingowych.</p>
+  <div class="welcome-stats">
+    <div class="stat-pill"><strong>5</strong><span>Menedżerów</span></div>
+    <div class="stat-pill"><strong>5</strong><span>Drużyn</span></div>
+    <div class="stat-pill"><strong>11</strong><span>Graczy</span></div>
+    <div class="stat-pill"><strong>∞</strong><span>Rywalizacja</span></div>
+  </div>
+  <button class="btn btn-primary btn-block" style="max-width:320px;" onclick="showScreen('setup')">⚽ Rozpocznij grę</button>
+  <button class="btn btn-ghost btn-sm music-btn-el" style="opacity:0.45;font-size:15px;" onclick="toggleMusic()" title="Włącz muzykę">🎵 Muzyka</button>
+</div>
+
+<div id="screen-setup" class="screen">
+  <div class="header">
+    <div class="badge"><svg viewBox="0 0 60 60" fill="none"><circle cx="30" cy="30" r="26" stroke="rgba(255,255,255,.4)" stroke-width="1.5"/><polygon points="30,14 33,22 42,22 35,27 37,36 30,31 23,36 25,27 18,22 27,22" fill="white" opacity=".9"/></svg></div>
+    <div class="header-title"><h1>FC MATILUKI</h1><p>KONFIGURACJA GRY</p></div>
+    <button class="btn btn-ghost btn-sm" onclick="showScreen('welcome')">← Wróć</button>
+  </div>
+  <div class="setup-body">
+    <div class="card">
+      <div class="section-title">Liczba menedżerów</div>
+      <div class="manager-count" style="margin-top:14px;">
+        <button class="count-btn" onclick="setCount(2)">2</button>
+        <button class="count-btn" onclick="setCount(3)">3</button>
+        <button class="count-btn" onclick="setCount(4)">4</button>
+        <button class="count-btn selected" onclick="setCount(5)">5</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="section-title">Nazwy menedżerów</div>
+      <div class="manager-inputs" id="manager-inputs" style="margin-top:14px;"></div>
+    </div>
+    <button class="btn btn-gold btn-block" onclick="startGame()">Startuj Draft →</button>
+  </div>
+</div>
+
+<div id="screen-game" class="screen">
+  <div class="header">
+    <div class="badge"><svg viewBox="0 0 60 60" fill="none"><circle cx="30" cy="30" r="26" stroke="rgba(255,255,255,.4)" stroke-width="1.5"/><polygon points="30,14 33,22 42,22 35,27 37,36 30,31 23,36 25,27 18,22 27,22" fill="white" opacity=".9"/></svg></div>
+    <div class="header-title"><h1>FC MATILUKI</h1><p id="header-sub">DRAFT</p></div>
+    <button class="btn btn-ghost btn-sm" onclick="confirmEnd()">Zakończ</button>
+  </div>
+  <div class="game-layout">
+    <div class="game-sidebar-col" style="display:flex;flex-direction:column;gap:10px;">
+      <div class="turn-bar">
+        <div class="turn-avatar" id="turn-avatar">M</div>
+        <div class="turn-info"><strong id="turn-name">—</strong><span id="turn-detail">Wybierz formację</span></div>
+        <div class="turn-badge">Tura</div>
+      </div>
+
+      <!-- Drużyny — collapsible on mobile -->
+      <div class="mob-section open" id="mob-teams-section">
+        <div class="mob-section-hdr" onclick="mobToggle('mob-teams-section')">
+          <span class="mob-label">Drużyny</span>
+          <span><span class="mob-badge" id="mob-teams-badge"></span><span class="mob-chevron">▼</span></span>
+        </div>
+        <div class="mob-section-body">
+          <div class="team-tabs" id="team-tabs" style="margin-top:4px;"></div>
+        </div>
+      </div>
+
+      <!-- Formacja — collapsible -->
+      <div class="mob-section open" id="mob-form-section">
+        <div class="mob-section-hdr" onclick="mobToggle('mob-form-section')">
+          <span class="mob-label">Formacja</span>
+          <span class="mob-chevron">▼</span>
+        </div>
+        <div class="mob-section-body">
+          <div id="formation-card">
+            <div class="formation-grid" style="margin-top:4px;">
+              <button class="form-btn" onclick="pickFormation('4-3-3')">4-3-3</button>
+              <button class="form-btn" onclick="pickFormation('4-4-2')">4-4-2</button>
+              <button class="form-btn" onclick="pickFormation('3-5-2')">3-5-2</button>
+              <button class="form-btn" onclick="pickFormation('4-2-3-1')">4-2-3-1</button>
+              <button class="form-btn" onclick="pickFormation('5-3-2')">5-3-2</button>
+              <button class="form-btn" onclick="pickFormation('4-1-4-1')">4-1-4-1</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="team-score-bar">
+        <div><div class="team-score-label">Suma punktów</div><div style="font-size:11px;color:var(--text3);margin-top:2px;" id="team-filled">0/11 graczy</div></div>
+        <div class="team-score-num" id="team-score">0</div>
+      </div>
+      <div class="card card-sm" style="display:flex;flex-direction:column;gap:10px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span style="font-size:11px;color:var(--text3);font-family:var(--font-cond);letter-spacing:2px;text-transform:uppercase;">Postęp</span>
+          <span style="font-size:12px;color:var(--text2);font-family:var(--font-cond);" id="progress-label">0%</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+      </div>
+
+      <!-- Ranking — collapsible -->
+      <div class="mob-section" id="mob-rank-section">
+        <div class="mob-section-hdr" onclick="mobToggle('mob-rank-section')">
+          <span class="mob-label">Ranking</span>
+          <span class="mob-chevron">▼</span>
+        </div>
+        <div class="mob-section-body">
+          <div class="leaderboard" id="leaderboard" style="margin-top:4px;"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="game-pitch-col">
+      <div class="pitch-container"><div class="pitch-zones" id="pitch-zones"></div></div>
+      <div class="game-action-bar" style="margin-top:12px;">
+        <button class="btn btn-ghost btn-sm" id="btn-save-team" onclick="saveTeam()" style="display:none;">Zapisz drużynę ✓</button>
+        <button class="btn btn-secondary btn-sm" id="btn-next-team" onclick="nextTeam()" style="display:none;">Kolejna drużyna →</button>
+        <button class="btn btn-primary btn-sm" id="btn-finish-mgr" onclick="finishManager()" style="display:none;">Oddaj turę →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="screen-results" class="screen">
+  <div class="header">
+    <div class="badge"><svg viewBox="0 0 60 60" fill="none"><circle cx="30" cy="30" r="26" stroke="rgba(255,255,255,.4)" stroke-width="1.5"/><polygon points="30,14 33,22 42,22 35,27 37,36 30,31 23,36 25,27 18,22 27,22" fill="white" opacity=".9"/></svg></div>
+    <div class="header-title"><h1>FC MATILUKI</h1><p>WYNIKI KOŃCOWE</p></div>
+  </div>
+  <div class="results-body">
+    <div class="trophy-area"><span class="trophy">🏆</span><div class="winner-name" id="winner-name">—</div><div class="winner-score" id="winner-score">0 PKT</div></div>
+    <div id="final-table"></div>
+    <div style="height:16px;"></div>
+    <button class="btn btn-primary btn-block" onclick="resetGame()">⚽ Nowa gra</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="player-modal" style="display:none;" onclick="closeModalOutside(event)">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-header"><h3 id="modal-title">Wybierz zawodnika</h3><button class="btn btn-ghost btn-sm" onclick="closeModal()">✕</button></div>
+    <div class="modal-search"><input type="text" id="modal-search-input" placeholder="Szukaj nazwiska lub klubu…" oninput="filterPlayers()"></div>
+    <div class="player-list" id="player-list"></div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// WIKIPEDIA PHOTO ENGINE
+// All player images sourced from Wikipedia (CC-licensed)
+// ═══════════════════════════════════════════════════════
+const imgCache = new Map();
+
+// Wikipedia article title overrides where name differs
+const WIKI = {
+  "Vinicius Jr.":"Vinícius Júnior",
+  "Rodri":"Rodri (footballer)",
+  "Lamine Yamal":"Lamine Yamal",
+  "Gavi":"Gavi (footballer)",
+  "Marquinhos":"Marquinhos (footballer)",
+  "Dusan Vlahovic":"Dušan Vlahović",
+  "Jonathan David":"Jonathan David (footballer)",
+  "Ansu Fati":"Ansu Fati",
+  "Ederson":"Ederson (footballer, born 1993)",
+  "Pau Cubarsí":"Pau Cubarsí",
+  "Manu Koné":"Manu Koné",
+  "İlkay Gündoğan":"İlkay Gündoğan",
+  "Ferdi Kadıoğlu":"Ferdi Kadıoğlu",
+  // Africa
+  "Sadio Mané":"Sadio Mané",
+  "Riyad Mahrez":"Riyad Mahrez",
+  "Kalidou Koulibaly":"Kalidou Koulibaly",
+  "Pierre-Emerick Aubameyang":"Pierre-Emerick Aubameyang",
+  "Sebastien Haller":"Sébastien Haller",
+  "Edouard Mendy":"Édouard Mendy",
+  "Wilfried Ndidi":"Wilfried Ndidi",
+  "Ismaïla Sarr":"Ismaïla Sarr",
+  "Hakim Ziyech":"Hakim Ziyech",
+  "Wilfried Zaha":"Wilfried Zaha",
+  "Nicolas Pépé":"Nicolas Pépé",
+  "Franck Kessié":"Franck Kessié",
+  "Chancel Mbemba":"Chancel Mbemba",
+  "Nayef Aguerd":"Nayef Aguerd",
+  "Rayan Aït-Nouri":"Rayan Aït-Nouri",
+  // Americas
+  "Lionel Messi":"Lionel Messi",
+  "Neymar Jr.":"Neymar",
+  "Luis Suárez":"Luis Suárez",
+  "Julián Álvarez":"Julián Álvarez",
+  "Enzo Fernández":"Enzo Fernández",
+  "Rodrigo De Paul":"Rodrigo De Paul",
+  "Nahuel Molina":"Nahuel Molina",
+  "Lisandro Martínez":"Lisandro Martínez",
+  "Emiliano Martínez":"Emiliano Martínez",
+  "Gabriel Jesus":"Gabriel Jesus",
+  "Gabriel Martinelli":"Gabriel Martinelli",
+  "Gabriel Magalhães":"Gabriel Magalhães",
+  "Éder Militão":"Éder Militão",
+  "Raphinha":"Raphinha",
+  "Richarlison":"Richarlison",
+  "Luis Díaz":"Luis Díaz",
+  "James Rodríguez":"James Rodríguez",
+  "Alexis Sánchez":"Alexis Sánchez",
+  "Leandro Paredes":"Leandro Paredes",
+  "Giovani Lo Celso":"Giovani Lo Celso",
+  "Marcos Acuña":"Marcos Acuña",
+  "Nicolás Otamendi":"Nicolás Otamendi",
+  "Malcom":"Malcom (footballer)",
+  "Roberto Firmino":"Roberto Firmino",
+  "Edinson Cavani":"Edinson Cavani",
+  "Radamel Falcao":"Radamel Falcao",
+  "Giorgian De Arrascaeta":"Giorgian de Arrascaeta",
+  "Rodrigo":"Rodrigo (footballer, born 1991)",
+  "Jhon Durán":"Jhon Durán",
+  "Alex Telles":"Alex Telles",
+  "Gonzalo Montiel":"Gonzalo Montiel",
+  "Guillermo Ochoa":"Guillermo Ochoa",
+  // Arab league & extra
+  "Cristiano Ronaldo":"Cristiano Ronaldo",
+  "Karim Benzema":"Karim Benzema",
+  "Aleksandar Mitrović":"Aleksandar Mitrović",
+  "Marcelo Brozović":"Marcelo Brozović",
+  "Anderson Talisca":"Anderson Talisca",
+  "Moussa Dembélé":"Moussa Dembélé",
+  "Aymeric Laporte":"Aymeric Laporte",
+  "Youssef En-Nesyri":"Youssef En-Nesyri",
+  "Viktor Gyökeres":"Viktor Gyökeres",
+  "Serhou Guirassy":"Serhou Guirassy",
+  "Lois Openda":"Loïs Openda",
+  "Benjamin Šeško":"Benjamin Šeško",
+  "Adam Hlozek":"Adam Hložek",
+  "Patrik Schick":"Patrik Schick",
+  "Artem Dovbyk":"Artem Dovbyk",
+  "Wissam Ben Yedder":"Wissam Ben Yedder",
+  "Niclas Füllkrug":"Niclas Füllkrug",
+  "Michael Olise":"Michael Olise",
+  "Jérémy Doku":"Jérémy Doku",
+  "Cody Gakpo":"Cody Gakpo",
+  "Brennan Johnson":"Brennan Johnson",
+  "Pedro Neto":"Pedro Neto",
+  "Gonçalo Ramos":"Gonçalo Ramos",
+  "Karim Adeyemi":"Karim Adeyemi",
+  "Ollie Watkins":"Ollie Watkins",
+  "Josko Gvardiol":"Joško Gvardiol",
+  "Jonathan Tah":"Jonathan Tah",
+  "Pierre Kalulu":"Pierre Kalulu",
+  "Mats Hummels":"Mats Hummels",
+  "Robin Koch":"Robin Koch (footballer)",
+  "Maxence Lacroix":"Maxence Lacroix",
+  "Willi Orbán":"Willi Orbán",
+  "Fabian Schär":"Fabian Schär",
+  "Gregor Kobel":"Gregor Kobel",
+  "Unai Simón":"Unai Simón",
+  "Giorgi Mamardashvili":"Giorgi Mamardashvili",
+  "Guglielmo Vicario":"Guglielmo Vicario",
+  "Ivan Provedel":"Ivan Provedel",
+  "Alex Remiro":"Alex Remiro",
+  "Predrag Rajković":"Predrag Rajković",
+  "Odysseas Vlachodimos":"Odysseas Vlachodimos",
+  "Rui Patrício":"Rui Patrício",
+  "Weverton":"Weverton (footballer)",
+  "Pervis Estupiñán":"Pervis Estupiñán",
+  "Destiny Udogie":"Destiny Udogie",
+  "Milos Kerkez":"Milos Kerkez",
+  "Kieran Trippier":"Kieran Trippier",
+  "Pedro Porro":"Pedro Porro",
+  "Denzel Dumfries":"Denzel Dumfries",
+  "Timothy Castagne":"Timothy Castagne",
+  "Sergiño Dest":"Sergiño Dest",
+  "Vitinha":"Vitinha (footballer)",
+  "Fabian Ruiz":"Fabián Ruiz",
+  "Ryan Gravenberch":"Ryan Gravenberch",
+  "Dominik Szoboszlai":"Dominik Szoboszlai",
+  "Federico Valverde":"Federico Valverde",
+  "Robert Andrich":"Robert Andrich",
+  "Exequiel Palacios":"Exequiel Palacios",
+  "Bryan Mbeumo":"Bryan Mbeumo",
+  "Riccardo Orsolini":"Riccardo Orsolini",
+  "Thiago Almada":"Thiago Almada",
+  "Mikel Oyarzabal":"Mikel Oyarzabal",
+  "Ferran Torres":"Ferran Torres",
+  "Mykhaylo Mudryk":"Mykhaylo Mudryk",
+  "Florian Thauvin":"Florian Thauvin",
+  "Arnaut Danjuma":"Arnaut Danjuma",
+  "Dodi Lukebakio":"Dodi Lukebakio",
+  "Youcef Atal":"Youcef Atal",
+  "Sofiane Boufal":"Sofiane Boufal",
+  "Bertrand Traoré":"Bertrand Traoré",
+  "Callum Hudson-Odoi":"Callum Hudson-Odoi",
+  "Nasser Al-Dawsari":"Nasser Al-Dawsari",
+  "Salem Al-Dawsari":"Salem Al-Dawsari",
+  "Ali Al-Bulayhi":"Ali Al-Bulayhi",
+  "Saud Abdulhamid":"Saud Abdulhamid",
+  "Mohammed Al-Owais":"Mohammed Al-Owais",
+  "Mohammed Al-Burayk":"Mohammed Al-Burayk",
+};
+const wTitle = n => WIKI[n] || n;
+
+async function loadWikiImg(name) {
+  if (imgCache.has(name)) return imgCache.get(name);
+  imgCache.set(name, 'pending');
+  const t = encodeURIComponent(wTitle(name));
+  const api = `https://en.wikipedia.org/w/api.php?action=query&titles=${t}&prop=pageimages&format=json&pithumbsize=180&origin=*`;
+  try {
+    const res = await fetch(api, {signal: AbortSignal.timeout(5000)});
+    const json = await res.json();
+    const pages = json?.query?.pages || {};
+    const src = Object.values(pages)[0]?.thumbnail?.source || null;
+    imgCache.set(name, src);
+    return src;
+  } catch {
+    imgCache.set(name, null);
+    return null;
+  }
+}
+
+// Render photo HTML — returns placeholder div with data-pname for async hydration
+function photoEl(name, cls) {
+  const cached = imgCache.get(name);
+  const init = (name.match(/\b[A-ZÁÉÍÓÚÀÈÙÄÖÜÑ]/g)||[name[0]])[0].toUpperCase();
+  if (cached && cached !== 'pending') {
+    return `<div class="${cls}"><img src="${cached}" alt="${name}" loading="lazy" onerror="this.parentNode.innerHTML='<span class=ph-init>${init}</span>'"></div>`;
+  }
+  return `<div class="${cls} loading-photo" data-pn="${name.replace(/"/g,'&quot;')}" data-init="${init}"><span class="ph-init" style="opacity:0">${init}</span></div>`;
+}
+
+// After DOM render, hydrate all placeholder photos
+function hydrate(root) {
+  root.querySelectorAll('[data-pn]').forEach(el => {
+    const name = el.getAttribute('data-pn');
+    const init = el.getAttribute('data-init') || name[0];
+    loadWikiImg(name).then(src => {
+      el.classList.remove('loading-photo');
+      el.removeAttribute('data-pn');
+      el.removeAttribute('data-init');
+      if (src) {
+        el.innerHTML = `<img src="${src}" alt="${name}" loading="lazy" onerror="this.parentNode.innerHTML='<span class=ph-init>${init}</span>'">`;
+      } else {
+        el.innerHTML = `<span class="ph-init">${init}</span>`;
+      }
+    });
+  });
+}
+
+// Background preload (batched to be gentle on the API)
+async function preloadAll() {
+  const names = new Set();
+  Object.values(PLAYERS).forEach(arr => arr.forEach(p => names.add(p.name)));
+  const arr = [...names];
+  for (let i = 0; i < arr.length; i += 6) {
+    await Promise.allSettled(arr.slice(i, i+6).map(n => loadWikiImg(n)));
+    await new Promise(r => setTimeout(r, 120)); // gentle throttle
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// PLAYER DATABASE — All European + Africa + Americas + Arab leagues
+// ═══════════════════════════════════════════════════════════════════
+const PLAYERS = {
+  GK:[
+    {name:"Thibaut Courtois",club:"Real Madrid",pts:90,tier:"A"},
+    {name:"Alisson Becker",club:"Liverpool",pts:88,tier:"A"},
+    {name:"Emiliano Martínez",club:"Aston Villa",pts:88,tier:"A"},
+    {name:"Gianluigi Donnarumma",club:"PSG",pts:86,tier:"A"},
+    {name:"Marc-André ter Stegen",club:"Barcelona",pts:85,tier:"A"},
+    {name:"Mike Maignan",club:"AC Milan",pts:85,tier:"A"},
+    {name:"David Raya",club:"Arsenal",pts:84,tier:"A"},
+    {name:"Jan Oblak",club:"Atlético Madrid",pts:84,tier:"A"},
+    {name:"Ederson",club:"Man City",pts:83,tier:"A"},
+    {name:"Yann Sommer",club:"Inter Milan",pts:81,tier:"A"},
+    {name:"Manuel Neuer",club:"Bayern Munich",pts:82,tier:"A"},
+    {name:"Gregor Kobel",club:"Dortmund",pts:82,tier:"A"},
+    {name:"Unai Simón",club:"Athletic Bilbao",pts:82,tier:"A"},
+    {name:"Diogo Costa",club:"Porto",pts:80,tier:"B"},
+    {name:"Giorgi Mamardashvili",club:"Valencia",pts:80,tier:"B"},
+    {name:"André Onana",club:"Man United",pts:78,tier:"B"},
+    {name:"Wojciech Szczęsny",club:"Barcelona",pts:80,tier:"B"},
+    {name:"Guglielmo Vicario",club:"Tottenham",pts:80,tier:"B"},
+    {name:"Lukáš Hrádecký",club:"Bayer Leverkusen",pts:79,tier:"B"},
+    {name:"Ivan Provedel",club:"Lazio",pts:79,tier:"B"},
+    {name:"Alex Remiro",club:"Real Sociedad",pts:78,tier:"B"},
+    {name:"Bart Verbruggen",club:"Brighton",pts:78,tier:"B"},
+    {name:"Odysseas Vlachodimos",club:"Newcastle",pts:77,tier:"B"},
+    {name:"Predrag Rajković",club:"Mallorca",pts:76,tier:"B"},
+    {name:"Rui Patrício",club:"Roma",pts:77,tier:"B"},
+    {name:"Édouard Mendy",club:"Al-Ahli",pts:79,tier:"B"},
+    {name:"Bono",club:"Al-Qadsiah",pts:78,tier:"B"},
+    {name:"Mohammed Al-Owais",club:"Al-Hilal",pts:78,tier:"B"},
+    {name:"Weverton",club:"Palmeiras",pts:78,tier:"B"},
+    {name:"Guillermo Ochoa",club:"LAFC",pts:74,tier:"B"},
+    // NEW GK ADDITIONS
+    {name:"Kepa Arrizabalaga",club:"Real Madrid",pts:80,tier:"B"},
+    {name:"Jordan Pickford",club:"Everton",pts:82,tier:"A"},
+    {name:"Aaron Ramsdale",club:"Southampton",pts:80,tier:"B"},
+    {name:"Bernd Leno",club:"Fulham",pts:79,tier:"B"},
+    {name:"Nick Pope",club:"Newcastle",pts:81,tier:"A"},
+    {name:"Kevin Trapp",club:"Eintracht Frankfurt",pts:80,tier:"B"},
+    {name:"Oliver Baumann",club:"Hoffenheim",pts:79,tier:"B"},
+    {name:"Alphonse Areola",club:"West Ham",pts:79,tier:"B"},
+    {name:"Bento",club:"Al-Nassr",pts:78,tier:"B"},
+    {name:"Marcelo Grohe",club:"Al-Ittihad",pts:77,tier:"B"},
+    {name:"Anatoliy Trubin",club:"Benfica",pts:79,tier:"B"},
+    {name:"David de Gea",club:"Fiorentina",pts:80,tier:"B"},
+  ],
+  CB:[
+    {name:"Virgil van Dijk",club:"Liverpool",pts:91,tier:"A"},
+    {name:"Rúben Dias",club:"Man City",pts:90,tier:"A"},
+    {name:"William Saliba",club:"Arsenal",pts:88,tier:"A"},
+    {name:"Achraf Hakimi",club:"PSG",pts:88,tier:"A"},
+    {name:"Alessandro Bastoni",club:"Inter Milan",pts:87,tier:"A"},
+    {name:"Marquinhos",club:"PSG",pts:87,tier:"A"},
+    {name:"Éder Militão",club:"Real Madrid",pts:87,tier:"A"},
+    {name:"Gabriel Magalhães",club:"Arsenal",pts:86,tier:"A"},
+    {name:"Jules Koundé",club:"Barcelona",pts:86,tier:"A"},
+    {name:"Ronald Araújo",club:"Barcelona",pts:86,tier:"A"},
+    {name:"Lisandro Martínez",club:"Man United",pts:85,tier:"A"},
+    {name:"Cristian Romero",club:"Tottenham",pts:85,tier:"A"},
+    {name:"Josko Gvardiol",club:"Man City",pts:84,tier:"A"},
+    {name:"Dayot Upamecano",club:"Bayern Munich",pts:84,tier:"A"},
+    {name:"Ibrahima Konaté",club:"Liverpool",pts:84,tier:"A"},
+    {name:"Pau Cubarsí",club:"Barcelona",pts:83,tier:"A"},
+    {name:"Benjamin Pavard",club:"Inter Milan",pts:82,tier:"A"},
+    {name:"Jonathan Tah",club:"Bayer Leverkusen",pts:82,tier:"A"},
+    {name:"Kalidou Koulibaly",club:"Al-Hilal",pts:82,tier:"A"},
+    {name:"José Giménez",club:"Atlético Madrid",pts:81,tier:"A"},
+    {name:"Mats Hummels",club:"Roma",pts:81,tier:"A"},
+    {name:"Inigo Martinez",club:"Barcelona",pts:81,tier:"A"},
+    {name:"Fabian Schär",club:"Newcastle",pts:79,tier:"B"},
+    {name:"Pierre Kalulu",club:"Juventus",pts:80,tier:"B"},
+    {name:"Leny Yoro",club:"Man United",pts:80,tier:"B"},
+    {name:"Nicolás Otamendi",club:"Benfica",pts:80,tier:"B"},
+    {name:"Nayef Aguerd",club:"West Ham",pts:79,tier:"B"},
+    {name:"Niklas Süle",club:"Dortmund",pts:79,tier:"B"},
+    {name:"Willi Orbán",club:"RB Leipzig",pts:79,tier:"B"},
+    {name:"Robin Koch",club:"Eintracht Frankfurt",pts:78,tier:"B"},
+    {name:"Chancel Mbemba",club:"Marseille",pts:78,tier:"B"},
+    {name:"Maxence Lacroix",club:"Wolfsburg",pts:78,tier:"B"},
+    {name:"Ola Aina",club:"Nottingham Forest",pts:76,tier:"B"},
+    {name:"Abdou Diallo",club:"RB Leipzig",pts:76,tier:"B"},
+    {name:"Ali Al-Bulayhi",club:"Al-Hilal",pts:77,tier:"B"},
+    {name:"Saud Abdulhamid",club:"Roma",pts:76,tier:"B"},
+    // NEW CB ADDITIONS
+    {name:"John Stones",club:"Man City",pts:85,tier:"A"},
+    {name:"Manuel Akanji",club:"Man City",pts:84,tier:"A"},
+    {name:"Nathan Aké",club:"Man City",pts:83,tier:"A"},
+    {name:"Ben White",club:"Arsenal",pts:83,tier:"A"},
+    {name:"Jurriën Timber",club:"Arsenal",pts:81,tier:"A"},
+    {name:"Jarell Quansah",club:"Liverpool",pts:77,tier:"B"},
+    {name:"Sven Botman",club:"Newcastle",pts:82,tier:"A"},
+    {name:"Dan Burn",club:"Newcastle",pts:78,tier:"B"},
+    {name:"Raphaël Varane",club:"Como",pts:81,tier:"A"},
+    {name:"Harry Maguire",club:"Man United",pts:78,tier:"B"},
+    {name:"Micky van de Ven",club:"Tottenham",pts:82,tier:"A"},
+    {name:"Thiago Silva",club:"Fluminense",pts:82,tier:"A"},
+    {name:"Levi Colwill",club:"Chelsea",pts:79,tier:"B"},
+    {name:"Antonio Rüdiger",club:"Real Madrid",pts:88,tier:"A"},
+    {name:"David Alaba",club:"Real Madrid",pts:85,tier:"A"},
+    {name:"Andreas Christensen",club:"Barcelona",pts:83,tier:"A"},
+    {name:"Mario Hermoso",club:"Roma",pts:80,tier:"B"},
+    {name:"Stefan de Vrij",club:"Inter Milan",pts:81,tier:"A"},
+    {name:"Fikayo Tomori",club:"AC Milan",pts:82,tier:"A"},
+    {name:"Gleison Bremer",club:"Juventus",pts:84,tier:"A"},
+    {name:"Danilo",club:"Juventus",pts:80,tier:"B"},
+    {name:"Nico Schlotterbeck",club:"Dortmund",pts:83,tier:"A"},
+    {name:"Kim Min-jae",club:"Bayern Munich",pts:84,tier:"A"},
+    {name:"Matthijs de Ligt",club:"Man United",pts:83,tier:"A"},
+    {name:"Edmond Tapsoba",club:"Bayer Leverkusen",pts:82,tier:"A"},
+    {name:"Odilon Kossounou",club:"Atalanta",pts:81,tier:"A"},
+    {name:"Merih Demiral",club:"Al-Ahli",pts:78,tier:"B"},
+    {name:"Roger Ibañez",club:"Al-Ahli",pts:79,tier:"B"},
+    {name:"Romain Saïss",club:"Al-Shabab",pts:76,tier:"B"}
+  ],
+  LB:[
+    {name:"Theo Hernández",club:"AC Milan",pts:87,tier:"A"},
+    {name:"Alphonso Davies",club:"Bayern Munich",pts:86,tier:"A"},
+    {name:"Andrew Robertson",club:"Liverpool",pts:84,tier:"A"},
+    {name:"Alejandro Grimaldo",club:"Bayer Leverkusen",pts:83,tier:"A"},
+    {name:"Nuno Mendes",club:"PSG",pts:82,tier:"A"},
+    {name:"David Raum",club:"RB Leipzig",pts:80,tier:"B"},
+    {name:"Rayan Aït-Nouri",club:"Wolves",pts:80,tier:"B"},
+    {name:"Pervis Estupiñán",club:"Brighton",pts:80,tier:"B"},
+    {name:"Destiny Udogie",club:"Tottenham",pts:79,tier:"B"},
+    {name:"Ferdi Kadıoğlu",club:"Brighton",pts:78,tier:"B"},
+    {name:"Milos Kerkez",club:"Bournemouth",pts:77,tier:"B"},
+    {name:"Marcos Acuña",club:"Sevilla",pts:78,tier:"B"},
+    {name:"Konstantinos Tsimikas",club:"Liverpool",pts:76,tier:"B"},
+    {name:"Borna Barisic",club:"Rangers",pts:76,tier:"B"},
+    {name:"Tyrell Malacia",club:"Man United",pts:75,tier:"B"},
+    {name:"Alex Telles",club:"Al-Nassr",pts:77,tier:"B"},
+    // NEW LB ADDITIONS
+    {name:"Oleksandr Zinchenko",club:"Arsenal",pts:81,tier:"A"},
+    {name:"Luke Shaw",club:"Man United",pts:81,tier:"A"},
+    {name:"Ben Chilwell",club:"Chelsea",pts:79,tier:"B"},
+    {name:"Marc Cucurella",club:"Chelsea",pts:80,tier:"B"},
+    {name:"Lucas Digne",club:"Aston Villa",pts:79,tier:"B"},
+    {name:"José Gayà",club:"Valencia",pts:81,tier:"A"},
+    {name:"Alejandro Balde",club:"Barcelona",pts:82,tier:"A"},
+    {name:"Ferland Mendy",club:"Real Madrid",pts:83,tier:"A"},
+    {name:"Federico Dimarco",club:"Inter Milan",pts:84,tier:"A"},
+    {name:"Raphaël Guerreiro",club:"Bayern Munich",pts:81,tier:"A"},
+    {name:"Ramy Bensebaini",club:"Dortmund",pts:78,tier:"B"},
+    {name:"Ghislain Konan",club:"Al-Fayha",pts:76,tier:"B"}
+  ],
+  RB:[
+    {name:"Trent Alexander-Arnold",club:"Real Madrid",pts:91,tier:"A"},
+    {name:"Achraf Hakimi",club:"PSG",pts:88,tier:"A"},
+    {name:"Reece James",club:"Chelsea",pts:84,tier:"A"},
+    {name:"João Cancelo",club:"Barcelona",pts:82,tier:"A"},
+    {name:"Nahuel Molina",club:"Atlético Madrid",pts:82,tier:"A"},
+    {name:"Benjamin Pavard",club:"Inter Milan",pts:82,tier:"A"},
+    {name:"Kieran Trippier",club:"Newcastle",pts:81,tier:"A"},
+    {name:"Pedro Porro",club:"Tottenham",pts:81,tier:"A"},
+    {name:"Denzel Dumfries",club:"Inter Milan",pts:81,tier:"B"},
+    {name:"Kyle Walker",club:"Man City",pts:80,tier:"B"},
+    {name:"Noussair Mazraoui",club:"Man United",pts:79,tier:"B"},
+    {name:"Timothy Castagne",club:"Fulham",pts:77,tier:"B"},
+    {name:"Sergiño Dest",club:"PSV",pts:77,tier:"B"},
+    {name:"Gonzalo Montiel",club:"Nottingham Forest",pts:77,tier:"B"},
+    {name:"Hamari Traoré",club:"Real Sociedad",pts:76,tier:"B"},
+    {name:"Mohammed Al-Burayk",club:"Al-Hilal",pts:76,tier:"B"},
+    // NEW RB ADDITIONS
+    {name:"Takehiro Tomiyasu",club:"Arsenal",pts:80,tier:"B"},
+    {name:"Diogo Dalot",club:"Man United",pts:81,tier:"A"},
+    {name:"Aaron Wan-Bissaka",club:"West Ham",pts:79,tier:"B"},
+    {name:"Conor Bradley",club:"Liverpool",pts:78,tier:"B"},
+    {name:"Rico Lewis",club:"Man City",pts:78,tier:"B"},
+    {name:"Malo Gusto",club:"Chelsea",pts:80,tier:"B"},
+    {name:"Dani Carvajal",club:"Real Madrid",pts:85,tier:"A"},
+    {name:"Giovanni Di Lorenzo",club:"Napoli",pts:83,tier:"A"},
+    {name:"Davide Calabria",club:"AC Milan",pts:79,tier:"B"},
+    {name:"Jeremie Frimpong",club:"Bayer Leverkusen",pts:85,tier:"A"},
+    {name:"Sultan Al-Ghannam",club:"Al-Nassr",pts:77,tier:"B"}
+  ],
+  CDM:[
+    {name:"Rodri",club:"Man City",pts:95,tier:"S"},
+    {name:"Declan Rice",club:"Arsenal",pts:89,tier:"A"},
+    {name:"Aurélien Tchouaméni",club:"Real Madrid",pts:87,tier:"A"},
+    {name:"Enzo Fernández",club:"Chelsea",pts:86,tier:"A"},
+    {name:"Bruno Guimarães",club:"Newcastle",pts:86,tier:"A"},
+    {name:"Hakan Çalhanoğlu",club:"Inter Milan",pts:85,tier:"A"},
+    {name:"Alexis Mac Allister",club:"Liverpool",pts:85,tier:"A"},
+    {name:"Sandro Tonali",club:"Newcastle",pts:83,tier:"A"},
+    {name:"Gabriel",club:"Arsenal",pts:83,tier:"A"},
+    {name:"Rodrigo De Paul",club:"Atlético Madrid",pts:84,tier:"A"},
+    {name:"Granit Xhaka",club:"Bayer Leverkusen",pts:82,tier:"A"},
+    {name:"Casemiro",club:"Man United",pts:82,tier:"A"},
+    {name:"Manu Koné",club:"Real Madrid",pts:82,tier:"A"},
+    {name:"Marcelo Brozović",club:"Al-Nassr",pts:81,tier:"A"},
+    {name:"Thomas Partey",club:"Arsenal",pts:80,tier:"B"},
+    {name:"Matteo Guendouzi",club:"Lazio",pts:80,tier:"B"},
+    {name:"Youri Tielemans",club:"Aston Villa",pts:79,tier:"B"},
+    {name:"Tomas Soucek",club:"West Ham",pts:78,tier:"B"},
+    {name:"Dani Ceballos",club:"Real Betis",pts:78,tier:"B"},
+    {name:"Guido Rodríguez",club:"Real Betis",pts:78,tier:"B"},
+    {name:"Franck Kessié",club:"Al-Ahli",pts:79,tier:"B"},
+    {name:"Wilfried Ndidi",club:"Leicester",pts:78,tier:"B"},
+    {name:"Seko Fofana",club:"Al-Qadsiah",pts:77,tier:"B"},
+    {name:"Idrissa Gueye",club:"Everton",pts:76,tier:"B"},
+    {name:"Salem Al-Dawsari",club:"Al-Hilal",pts:78,tier:"B"},
+    {name:"Nasser Al-Dawsari",club:"Al-Hilal",pts:77,tier:"B"},
+    {name:"Cheikhou Kouyaté",club:"Nottingham Forest",pts:74,tier:"B"},
+    // NEW CDM ADDITIONS
+    {name:"Wataru Endo",club:"Liverpool",pts:79,tier:"B"},
+    {name:"Moises Caicedo",club:"Chelsea",pts:83,tier:"A"},
+    {name:"Romeo Lavia",club:"Chelsea",pts:78,tier:"B"},
+    {name:"Jorginho",club:"Arsenal",pts:81,tier:"A"},
+    {name:"Yves Bissouma",club:"Tottenham",pts:80,tier:"B"},
+    {name:"Pierre-Emile Højbjerg",club:"Marseille",pts:79,tier:"B"},
+    {name:"Koke",club:"Atlético Madrid",pts:82,tier:"A"},
+    {name:"Marcos Llorente",club:"Atlético Madrid",pts:83,tier:"A"},
+    {name:"Ismaël Bennacer",club:"AC Milan",pts:82,tier:"A"},
+    {name:"Bryan Cristante",club:"Roma",pts:79,tier:"B"},
+    {name:"Leon Goretzka",club:"Bayern Munich",pts:83,tier:"A"},
+    {name:"Aleksandar Pavlović",club:"Bayern Munich",pts:80,tier:"B"},
+    {name:"Emre Can",club:"Dortmund",pts:79,tier:"B"},
+    {name:"N'Golo Kanté",club:"Al-Ittihad",pts:84,tier:"A"},
+    {name:"Fabinho",club:"Al-Ittihad",pts:82,tier:"A"},
+    {name:"Rúben Neves",club:"Al-Hilal",pts:82,tier:"A"}
+  ],
+  CM:[
+    {name:"Jude Bellingham",club:"Real Madrid",pts:96,tier:"S"},
+    {name:"Kevin De Bruyne",club:"Man City",pts:92,tier:"S"},
+    {name:"Florian Wirtz",club:"Bayer Leverkusen",pts:92,tier:"S"},
+    {name:"Martin Ødegaard",club:"Arsenal",pts:91,tier:"A"},
+    {name:"Toni Kroos",club:"Real Madrid",pts:90,tier:"A"},
+    {name:"Neymar Jr.",club:"Al-Hilal",pts:88,tier:"A"},
+    {name:"Bernardo Silva",club:"Man City",pts:89,tier:"A"},
+    {name:"Jamal Musiala",club:"Bayern Munich",pts:89,tier:"A"},
+    {name:"Nicolò Barella",club:"Inter Milan",pts:88,tier:"A"},
+    {name:"Joshua Kimmich",club:"Bayern Munich",pts:88,tier:"A"},
+    {name:"Pedri",club:"Barcelona",pts:88,tier:"A"},
+    {name:"Luka Modrić",club:"Real Madrid",pts:87,tier:"A"},
+    {name:"Federico Valverde",club:"Real Madrid",pts:87,tier:"A"},
+    {name:"Sadio Mané",club:"Al-Nassr",pts:85,tier:"A"},
+    {name:"Gavi",club:"Barcelona",pts:85,tier:"A"},
+    {name:"İlkay Gündoğan",club:"Barcelona",pts:84,tier:"A"},
+    {name:"Vitinha",club:"PSG",pts:84,tier:"A"},
+    {name:"Fabian Ruiz",club:"PSG",pts:84,tier:"A"},
+    {name:"Leon Goretzka",club:"Bayern Munich",pts:83,tier:"A"},
+    {name:"Ryan Gravenberch",club:"Liverpool",pts:83,tier:"A"},
+    {name:"Dominik Szoboszlai",club:"Liverpool",pts:83,tier:"A"},
+    {name:"Konrad Laimer",club:"Bayern Munich",pts:82,tier:"A"},
+    {name:"Mikel Oyarzabal",club:"Real Sociedad",pts:82,tier:"A"},
+    {name:"Dejan Kulusevski",club:"Tottenham",pts:82,tier:"A"},
+    {name:"Robert Andrich",club:"Bayer Leverkusen",pts:82,tier:"A"},
+    {name:"Exequiel Palacios",club:"Bayer Leverkusen",pts:81,tier:"A"},
+    {name:"Bryan Mbeumo",club:"Brentford",pts:81,tier:"A"},
+    {name:"James Rodríguez",club:"Rayo Vallecano",pts:80,tier:"B"},
+    {name:"Giorgian De Arrascaeta",club:"Flamengo",pts:80,tier:"B"},
+    {name:"Rodrigo Bentancur",club:"Tottenham",pts:80,tier:"B"},
+    {name:"Manuel Locatelli",club:"Juventus",pts:80,tier:"B"},
+    {name:"Douglas Luiz",club:"Juventus",pts:80,tier:"B"},
+    {name:"Anderson Talisca",club:"Al-Nassr",pts:79,tier:"B"},
+    {name:"Christoph Baumgartner",club:"RB Leipzig",pts:79,tier:"B"},
+    {name:"Pascal Gross",club:"Brighton",pts:79,tier:"B"},
+    {name:"Leandro Paredes",club:"Roma",pts:78,tier:"B"},
+    {name:"Emre Can",club:"Dortmund",pts:78,tier:"B"},
+    // NEW CM ADDITIONS
+    {name:"Mateo Kovačić",club:"Man City",pts:82,tier:"A"},
+    {name:"Matheus Nunes",club:"Man City",pts:80,tier:"B"},
+    {name:"Harvey Elliott",club:"Liverpool",pts:79,tier:"B"},
+    {name:"Curtis Jones",club:"Liverpool",pts:78,tier:"B"},
+    {name:"Kobbie Mainoo",club:"Man United",pts:80,tier:"B"},
+    {name:"Scott McTominay",club:"Napoli",pts:79,tier:"B"},
+    {name:"Mason Mount",club:"Man United",pts:80,tier:"B"},
+    {name:"Conor Gallagher",club:"Atlético Madrid",pts:81,tier:"A"},
+    {name:"Eduardo Camavinga",club:"Real Madrid",pts:85,tier:"A"},
+    {name:"Fermín López",club:"Barcelona",pts:79,tier:"B"},
+    {name:"Pape Matar Sarr",club:"Tottenham",pts:79,tier:"B"},
+    {name:"Davide Frattesi",club:"Inter Milan",pts:81,tier:"A"},
+    {name:"Tijjani Reijnders",club:"AC Milan",pts:81,tier:"A"},
+    {name:"Ruben Loftus-Cheek",club:"AC Milan",pts:80,tier:"B"},
+    {name:"Adrien Rabiot",club:"Marseille",pts:82,tier:"A"},
+    {name:"Weston McKennie",club:"Juventus",pts:79,tier:"B"},
+    {name:"Lorenzo Pellegrini",club:"Roma",pts:81,tier:"A"},
+    {name:"Marcel Sabitzer",club:"Dortmund",pts:81,tier:"A"},
+    {name:"Julian Brandt",club:"Dortmund",pts:82,tier:"A"},
+    {name:"Sergej Milinković-Savić",club:"Al-Hilal",pts:84,tier:"A"},
+    {name:"Otávio",club:"Al-Nassr",pts:82,tier:"A"},
+    {name:"Gabri Veiga",club:"Al-Ahli",pts:78,tier:"B"},
+    {name:"Jordan Henderson",club:"Ajax",pts:77,tier:"B"},
+    {name:"Georginio Wijnaldum",club:"Al-Ettifaq",pts:78,tier:"B"}
+  ],
+  CAM:[
+    {name:"Phil Foden",club:"Man City",pts:91,tier:"A"},
+    {name:"Jamal Musiala",club:"Bayern Munich",pts:89,tier:"A"},
+    {name:"Antoine Griezmann",club:"Atlético Madrid",pts:88,tier:"A"},
+    {name:"Riyad Mahrez",club:"Al-Ahli",pts:84,tier:"A"},
+    {name:"Dani Olmo",club:"Barcelona",pts:85,tier:"A"},
+    {name:"Kai Havertz",club:"Arsenal",pts:84,tier:"A"},
+    {name:"James Maddison",club:"Tottenham",pts:83,tier:"A"},
+    {name:"Paulo Dybala",club:"Roma",pts:82,tier:"A"},
+    {name:"Bryan Mbeumo",club:"Brentford",pts:81,tier:"A"},
+    {name:"Mikel Oyarzabal",club:"Real Sociedad",pts:82,tier:"A"},
+    {name:"Riccardo Orsolini",club:"Bologna",pts:78,tier:"B"},
+    {name:"Isco",club:"Real Betis",pts:78,tier:"B"},
+    {name:"Giovani Lo Celso",club:"Tottenham",pts:79,tier:"B"},
+    {name:"Thiago Almada",club:"Atlanta United",pts:77,tier:"B"},
+    // NEW CAM ADDITIONS
+    {name:"Bruno Fernandes",club:"Man United",pts:88,tier:"A"},
+    {name:"Christian Eriksen",club:"Man United",pts:79,tier:"B"},
+    {name:"Cole Palmer",club:"Chelsea",pts:86,tier:"A"},
+    {name:"Arda Güler",club:"Real Madrid",pts:79,tier:"B"},
+    {name:"Brahim Díaz",club:"Real Madrid",pts:82,tier:"A"},
+    {name:"Henrikh Mkhitaryan",club:"Inter Milan",pts:81,tier:"A"},
+    {name:"Teun Koopmeiners",club:"Juventus",pts:82,tier:"A"},
+    {name:"Jonas Hofmann",club:"Bayer Leverkusen",pts:81,tier:"A"},
+    {name:"Thomas Müller",club:"Bayern Munich",pts:83,tier:"A"},
+    {name:"Xavi Simons",club:"RB Leipzig",pts:84,tier:"A"}
+  ],
+  LW:[
+    {name:"Vinicius Jr.",club:"Real Madrid",pts:97,tier:"S"},
+    {name:"Bukayo Saka",club:"Arsenal",pts:94,tier:"S"},
+    {name:"Lamine Yamal",club:"Barcelona",pts:93,tier:"S"},
+    {name:"Rafael Leão",club:"AC Milan",pts:89,tier:"A"},
+    {name:"Neymar Jr.",club:"Al-Hilal",pts:88,tier:"A"},
+    {name:"Raphinha",club:"Barcelona",pts:88,tier:"A"},
+    {name:"Son Heung-min",club:"Tottenham",pts:88,tier:"A"},
+    {name:"Rodrygo",club:"Real Madrid",pts:88,tier:"A"},
+    {name:"Leroy Sané",club:"Bayern Munich",pts:87,tier:"A"},
+    {name:"Luis Díaz",club:"Liverpool",pts:87,tier:"A"},
+    {name:"Gabriel Martinelli",club:"Arsenal",pts:85,tier:"A"},
+    {name:"Sadio Mané",club:"Al-Nassr",pts:85,tier:"A"},
+    {name:"Riyad Mahrez",club:"Al-Ahli",pts:84,tier:"A"},
+    {name:"Michael Olise",club:"Bayern Munich",pts:83,tier:"A"},
+    {name:"Jérémy Doku",club:"Man City",pts:82,tier:"A"},
+    {name:"Federico Valverde",club:"Real Madrid",pts:87,tier:"A"},
+    {name:"Karim Adeyemi",club:"Dortmund",pts:80,tier:"B"},
+    {name:"Jadon Sancho",club:"Chelsea",pts:80,tier:"B"},
+    {name:"Ferran Torres",club:"Barcelona",pts:79,tier:"B"},
+    {name:"Ismaïla Sarr",club:"Crystal Palace",pts:79,tier:"B"},
+    {name:"Wilfried Zaha",club:"Galatasaray",pts:79,tier:"B"},
+    {name:"Adama Traoré",club:"Fulham",pts:78,tier:"B"},
+    {name:"Mykhaylo Mudryk",club:"Chelsea",pts:78,tier:"B"},
+    {name:"Alexis Sánchez",club:"Udinese",pts:78,tier:"B"},
+    {name:"Nicolas Pépé",club:"Nice",pts:77,tier:"B"},
+    {name:"Arnaut Danjuma",club:"Villarreal",pts:77,tier:"B"},
+    {name:"Florian Thauvin",club:"Udinese",pts:76,tier:"B"},
+    {name:"Thorgan Hazard",club:"PSV",pts:75,tier:"B"},
+    // NEW LW ADDITIONS
+    {name:"Jack Grealish",club:"Man City",pts:83,tier:"A"},
+    {name:"Leandro Trossard",club:"Arsenal",pts:82,tier:"A"},
+    {name:"Diogo Jota",club:"Liverpool",pts:84,tier:"A"},
+    {name:"Marcus Rashford",club:"Man United",pts:82,tier:"A"},
+    {name:"Alejandro Garnacho",club:"Man United",pts:81,tier:"A"},
+    {name:"Raheem Sterling",club:"Arsenal",pts:80,tier:"B"},
+    {name:"Samuel Lino",club:"Atlético Madrid",pts:80,tier:"B"},
+    {name:"Kenan Yildiz",club:"Juventus",pts:79,tier:"B"},
+    {name:"Serge Gnabry",club:"Bayern Munich",pts:83,tier:"A"},
+    {name:"Yannick Carrasco",club:"Al-Shabab",pts:81,tier:"A"},
+    {name:"Allan Saint-Maximin",club:"Fenerbahçe",pts:80,tier:"B"}
+  ],
+  RW:[
+    {name:"Kylian Mbappé",club:"Real Madrid",pts:97,tier:"S"},
+    {name:"Mohamed Salah",club:"Liverpool",pts:95,tier:"S"},
+    {name:"Cristiano Ronaldo",club:"Al-Nassr",pts:88,tier:"A"},
+    {name:"Nico Williams",club:"Athletic Bilbao",pts:88,tier:"A"},
+    {name:"Khvicha Kvaratskhelia",club:"PSG",pts:88,tier:"A"},
+    {name:"Jamal Musiala",club:"Bayern Munich",pts:89,tier:"A"},
+    {name:"Ousmane Dembélé",club:"PSG",pts:87,tier:"A"},
+    {name:"Karim Benzema",club:"Al-Ittihad",pts:86,tier:"A"},
+    {name:"Bradley Barcola",club:"PSG",pts:85,tier:"A"},
+    {name:"Cody Gakpo",club:"Liverpool",pts:82,tier:"A"},
+    {name:"Pedro Neto",club:"Chelsea",pts:81,tier:"A"},
+    {name:"Gonçalo Ramos",club:"PSG",pts:82,tier:"A"},
+    {name:"Kingsley Coman",club:"Bayern Munich",pts:82,tier:"A"},
+    {name:"Malcom",club:"Al-Hilal",pts:78,tier:"B"},
+    {name:"Brennan Johnson",club:"Tottenham",pts:80,tier:"B"},
+    {name:"Federico Chiesa",club:"Liverpool",pts:79,tier:"B"},
+    {name:"Hakim Ziyech",club:"Galatasaray",pts:79,tier:"B"},
+    {name:"Dodi Lukebakio",club:"Sevilla",pts:78,tier:"B"},
+    {name:"Callum Hudson-Odoi",club:"Nottingham Forest",pts:77,tier:"B"},
+    {name:"Youcef Atal",club:"Nice",pts:76,tier:"B"},
+    {name:"Sofiane Boufal",club:"Southampton",pts:75,tier:"B"},
+    {name:"Bertrand Traoré",club:"Aston Villa",pts:74,tier:"B"},
+    {name:"Antony",club:"Real Betis",pts:74,tier:"B"},
+    // NEW RW ADDITIONS
+    {name:"Oscar Bobb",club:"Man City",pts:78,tier:"B"},
+    {name:"Miguel Almirón",club:"Newcastle",pts:78,tier:"B"},
+    {name:"Noni Madueke",club:"Chelsea",pts:80,tier:"B"},
+    {name:"Christian Pulisic",club:"AC Milan",pts:82,tier:"A"},
+    {name:"Samuel Chukwueze",club:"AC Milan",pts:78,tier:"B"},
+    {name:"Timothy Weah",club:"Juventus",pts:77,tier:"B"},
+    {name:"Donyell Malen",club:"Dortmund",pts:81,tier:"A"},
+    {name:"Nathan Tella",club:"Bayer Leverkusen",pts:78,tier:"B"}
+  ],
+  ST:[
+    {name:"Erling Haaland",club:"Man City",pts:97,tier:"S"},
+    {name:"Harry Kane",club:"Bayern Munich",pts:94,tier:"S"},
+    {name:"Lionel Messi",club:"Inter Miami",pts:94,tier:"S"},
+    {name:"Robert Lewandowski",club:"Barcelona",pts:92,tier:"S"},
+    {name:"Lautaro Martínez",club:"Inter Milan",pts:91,tier:"A"},
+    {name:"Cristiano Ronaldo",club:"Al-Nassr",pts:88,tier:"A"},
+    {name:"Alexander Isak",club:"Newcastle",pts:88,tier:"A"},
+    {name:"Victor Osimhen",club:"Galatasaray",pts:88,tier:"A"},
+    {name:"Julián Álvarez",club:"Atlético Madrid",pts:88,tier:"A"},
+    {name:"Antoine Griezmann",club:"Atlético Madrid",pts:88,tier:"A"},
+    {name:"Karim Benzema",club:"Al-Ittihad",pts:86,tier:"A"},
+    {name:"Viktor Gyökeres",club:"Sporting CP",pts:85,tier:"A"},
+    {name:"Dusan Vlahovic",club:"Juventus",pts:85,tier:"A"},
+    {name:"Ollie Watkins",club:"Aston Villa",pts:83,tier:"A"},
+    {name:"Jonathan David",club:"Lille",pts:83,tier:"A"},
+    {name:"Darwin Núñez",club:"Liverpool",pts:83,tier:"A"},
+    {name:"Christopher Nkunku",club:"Chelsea",pts:83,tier:"A"},
+    {name:"Aleksandar Mitrović",club:"Al-Hilal",pts:83,tier:"A"},
+    {name:"Gabriel Jesus",club:"Arsenal",pts:82,tier:"A"},
+    {name:"Lois Openda",club:"RB Leipzig",pts:82,tier:"A"},
+    {name:"Serhou Guirassy",club:"Dortmund",pts:82,tier:"A"},
+    {name:"Pierre-Emerick Aubameyang",club:"Marseille",pts:82,tier:"A"},
+    {name:"Romelu Lukaku",club:"Napoli",pts:82,tier:"A"},
+    {name:"Marcus Rashford",club:"Aston Villa",pts:82,tier:"A"},
+    {name:"Benjamin Šeško",club:"RB Leipzig",pts:81,tier:"A"},
+    {name:"Richarlison",club:"Tottenham",pts:81,tier:"B"},
+    {name:"Artem Dovbyk",club:"Roma",pts:81,tier:"A"},
+    {name:"Álvaro Morata",club:"AC Milan",pts:80,tier:"B"},
+    {name:"Patrik Schick",club:"Bayer Leverkusen",pts:80,tier:"B"},
+    {name:"Youssef En-Nesyri",club:"Fenerbahçe",pts:80,tier:"B"},
+    {name:"Luis Suárez",club:"Inter Miami",pts:80,tier:"B"},
+    {name:"Gianluca Scamacca",club:"Atalanta",pts:80,tier:"B"},
+    {name:"Jhon Durán",club:"Aston Villa",pts:80,tier:"B"},
+    {name:"Moussa Dembélé",club:"Al-Qadsiah",pts:78,tier:"B"},
+    {name:"Moise Kean",club:"Fiorentina",pts:79,tier:"B"},
+    {name:"Rasmus Højlund",club:"Man United",pts:79,tier:"B"},
+    {name:"Sebastien Haller",club:"Dortmund",pts:79,tier:"B"},
+    {name:"Niclas Füllkrug",club:"West Ham",pts:79,tier:"B"},
+    {name:"Ivan Toney",club:"Al-Ahli",pts:78,tier:"B"},
+    {name:"Tammy Abraham",club:"AC Milan",pts:78,tier:"B"},
+    {name:"Wissam Ben Yedder",club:"Monaco",pts:78,tier:"B"},
+    {name:"Rodrigo",club:"Leeds",pts:78,tier:"B"},
+    {name:"Adam Hlozek",club:"Bayer Leverkusen",pts:77,tier:"B"},
+    {name:"Edinson Cavani",club:"Boca Juniors",pts:75,tier:"B"},
+    {name:"Radamel Falcao",club:"Millonarios",pts:72,tier:"B"},
+    {name:"Odion Ighalo",club:"Al-Wehda",pts:74,tier:"B"},
+    // NEW ST ADDITIONS
+    {name:"Joshua Zirkzee",club:"Man United",pts:79,tier:"B"},
+    {name:"Nicolas Jackson",club:"Chelsea",pts:81,tier:"A"},
+    {name:"Callum Wilson",club:"Newcastle",pts:79,tier:"B"},
+    {name:"Dominic Calvert-Lewin",club:"Everton",pts:77,tier:"B"},
+    {name:"Dominic Solanke",club:"Tottenham",pts:81,tier:"A"},
+    {name:"Alexander Sørloth",club:"Atlético Madrid",pts:81,tier:"A"},
+    {name:"Kylian Mbappé",club:"Real Madrid",pts:97,tier:"S"},
+    {name:"Marcus Thuram",club:"Inter Milan",pts:84,tier:"A"},
+    {name:"Olivier Giroud",club:"LAFC",pts:79,tier:"B"},
+    {name:"Randal Kolo Muani",club:"PSG",pts:81,tier:"A"},
+    {name:"Arkadiusz Milik",club:"Juventus",pts:78,tier:"B"},
+    {name:"Eric Maxim Choupo-Moting",club:"Bayern Munich",pts:76,tier:"B"},
+    {name:"Abderrazak Hamdallah",club:"Al-Shabab",pts:78,tier:"B"},
+    {name:"Roberto Firmino",club:"Al-Ahli",pts:79,tier:"B"}
+  ],
+  CF:[
+    {name:"Lionel Messi",club:"Inter Miami",pts:94,tier:"S"},
+    {name:"Cristiano Ronaldo",club:"Al-Nassr",pts:88,tier:"A"},
+    {name:"Karim Benzema",club:"Al-Ittihad",pts:86,tier:"A"},
+    {name:"Antoine Griezmann",club:"Atlético Madrid",pts:88,tier:"A"},
+    {name:"Viktor Gyökeres",club:"Sporting CP",pts:85,tier:"A"},
+    {name:"Julián Álvarez",club:"Atlético Madrid",pts:88,tier:"A"},
+    {name:"Paulo Dybala",club:"Roma",pts:82,tier:"A"},
+    {name:"Romelu Lukaku",club:"Napoli",pts:82,tier:"A"},
+    {name:"Jonathan David",club:"Lille",pts:83,tier:"A"},
+    {name:"Gabriel Jesus",club:"Arsenal",pts:82,tier:"A"},
+    {name:"Roberto Firmino",club:"Al-Ahli",pts:79,tier:"B"},
+    {name:"Tammy Abraham",club:"AC Milan",pts:78,tier:"B"},
+    {name:"Rasmus Højlund",club:"Man United",pts:79,tier:"B"},
+    {name:"Gianluca Scamacca",club:"Atalanta",pts:80,tier:"B"},
+    // NEW CF ADDITIONS
+    {name:"João Félix",club:"Chelsea",pts:81,tier:"A"},
+    {name:"Ángel Correa",club:"Atlético Madrid",pts:80,tier:"B"}
+  ]
+};
+
+
+const FORMATIONS = {
+  "4-3-3": ["GK","RB","CB","CB","LB","CM","CM","CM","RW","ST","LW"],
+  "4-4-2": ["GK","RB","CB","CB","LB","RW","CM","CM","LW","ST","ST"],
+  "3-5-2": ["GK","CB","CB","CB","RB","CM","CDM","CM","LB","ST","ST"],
+  "4-2-3-1":["GK","RB","CB","CB","LB","CDM","CDM","CAM","RW","ST","LW"],
+  "5-3-2": ["GK","RB","CB","CB","CB","LB","CM","CM","CM","ST","ST"],
+  "4-1-4-1":["GK","RB","CB","CB","LB","CDM","RW","CM","CM","LW","ST"],
+};
+
+let G={numManagers:5,managers:[],currentMgr:0,currentRound:0,takenPlayers:{},phase:'setup'};
+
+function initManagers(){
+  G.managers=G.managers.map((name,i)=>({name,idx:i,teams:Array(5).fill(null).map(()=>({formation:null,slots:{},score:0,complete:false})),totalScore:0}));
+  G.takenPlayers={};
+}
+
+function showScreen(id){
+  sfxTransition();
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-'+id).classList.add('active');
+  window.scrollTo(0,0);
+  if(id==='results') setTimeout(sfxVictory, 400);
+  injectMuteBtns();
+  injectMusicBtns();
+  document.querySelectorAll('.music-btn-el').forEach(b=>{
+    b.style.opacity = _mxPlaying ? '1' : '0.45';
+    b.title = _mxPlaying ? 'Zatrzymaj muzykę' : 'Włącz muzykę';
+  });
+}
+
+let selectedCount=5;
+function setCount(n){
+  selectedCount=n;
+  document.querySelectorAll('.count-btn').forEach((b,i)=>b.classList.toggle('selected',(i+2)===n));
+  renderNameInputs(n);
+}
+function renderNameInputs(n){
+  const c=document.getElementById('manager-inputs');
+  c.innerHTML='';
+  for(let i=0;i<n;i++){
+    c.innerHTML+=`<div class="input-group"><label>Menedżer ${i+1}</label><input type="text" id="mgr-${i}" placeholder="Imię / Nick menedżera ${i+1}" value="Menedżer ${i+1}"></div>`;
+  }
+}
+
+function startGame(){
+  sfxStartGame();
+  G.numManagers=selectedCount;
+  G.managers=[];
+  for(let i=0;i<selectedCount;i++) G.managers.push(document.getElementById('mgr-'+i)?.value.trim()||`Menedżer ${i+1}`);
+  G.currentMgr=0;
+  G.currentRound=0;   // 0–4: which team slot everyone is filling now
+  initManagers();
+  showScreen('game');
+  renderGame();
+}
+
+// ── currentTeamIdx is always G.currentRound ──────────
+function curTeam(){ return G.managers[G.currentMgr].teams[G.currentRound]; }
+
+function renderGame(){
+  const mgr=G.managers[G.currentMgr];
+  const team=curTeam();
+  document.getElementById('header-sub').textContent=
+    `RUNDA ${G.currentRound+1}/5 — MENEDŻER ${G.currentMgr+1}/${G.managers.length}`;
+  document.getElementById('turn-name').textContent=mgr.name;
+  document.getElementById('turn-avatar').textContent=mgr.name[0].toUpperCase();
+  document.getElementById('turn-detail').textContent=team.formation
+    ?`Drużyna ${G.currentRound+1} · ${team.formation}`
+    :`Drużyna ${G.currentRound+1} — wybierz formację`;
+  renderTeamTabs();renderPitch();renderLeaderboard();updateButtons();updateScore();updateMobBadge();
+}
+
+function renderTeamTabs(){
+  const mgr=G.managers[G.currentMgr];
+  const c=document.getElementById('team-tabs');c.innerHTML='';
+  mgr.teams.forEach((t,i)=>{
+    const b=document.createElement('button');
+    const isCurrent = i===G.currentRound;
+    const isLocked  = i>G.currentRound;   // future rounds not yet reached
+    b.className='team-tab'+(isCurrent?' active':'')+(t.complete?' complete':'')+(isLocked?' locked':'');
+    b.textContent=`T${i+1}${t.complete?' ✓':''}`;
+    if(isLocked) b.style.opacity='0.35';
+    b.onclick=()=>{
+      if(!isLocked&&t.complete){sfxTab();renderPitchReadonly(i);}
+    };
+    c.appendChild(b);
+  });
+}
+
+// Show a previously completed team (read-only view)
+function renderPitchReadonly(roundIdx){
+  const team=G.managers[G.currentMgr].teams[roundIdx];
+  const zones=document.getElementById('pitch-zones');
+  const formCard=document.getElementById('formation-card');
+  formCard.style.display='none';
+  const mobFormRO=document.getElementById('mob-form-section');
+  if(mobFormRO) mobFormRO.classList.remove('open');
+  const pos=FORMATIONS[team.formation];
+  const gk=[],def=[],mid=[],att=[];
+  pos.forEach((p,i)=>{const s={pos:p,idx:i};if(p==='GK')gk.push(s);else if(['CB','LB','RB'].includes(p))def.push(s);else if(['CM','CDM','CAM'].includes(p))mid.push(s);else att.push(s);});
+  function zone(label,slots){
+    if(!slots.length) return '';
+    let h=`<div><div class="pitch-zone-label">${label}</div><div class="pitch-zone">`;
+    slots.forEach(s=>{
+      const pl=team.slots[s.idx];
+      if(pl){
+        const ln=pl.name.split(' ').pop();
+        h+=`<div class="position-slot filled" style="cursor:default;">
+          ${photoEl(pl.name,'slot-photo')}
+          <div class="slot-pos">${s.pos}</div>
+          <div class="slot-name" title="${pl.name}">${ln}</div>
+          <div class="slot-pts">${pl.pts}p</div>
+        </div>`;
+      } else {
+        h+=`<div class="position-slot" style="cursor:default;"><div class="slot-empty-icon">—</div><div class="slot-pos">${s.pos}</div></div>`;
+      }
+    });
+    return h+'</div></div>';
+  }
+  zones.innerHTML=zone('⚡ Atak',att)+zone('🔄 Pomoc',mid)+zone('🛡 Obrona',def)+zone('🥅 Bramka',gk);
+  hydrate(zones);
+}
+
+function renderPitch(){
+  const team=curTeam();
+  const zones=document.getElementById('pitch-zones');
+  const formCard=document.getElementById('formation-card');
+  if(!team.formation){
+    zones.innerHTML='<div style="text-align:center;padding:60px 20px;"><div style="font-size:40px;margin-bottom:12px;">⚽</div><div style="font-family:var(--font-cond);color:var(--text3);letter-spacing:2px;font-size:13px;">WYBIERZ FORMACJĘ</div></div>';
+    formCard.style.display='';
+    // On mobile: expand the formation section so user sees it
+    const mobForm=document.getElementById('mob-form-section');
+    if(mobForm) mobForm.classList.add('open');
+    return;
+  }
+  formCard.style.display='none';
+  // On mobile: collapse formation section once picked
+  const mobFormPicked=document.getElementById('mob-form-section');
+  if(mobFormPicked) mobFormPicked.classList.remove('open');
+  const pos=FORMATIONS[team.formation];
+  const gk=[],def=[],mid=[],att=[];
+  pos.forEach((p,i)=>{const s={pos:p,idx:i};if(p==='GK')gk.push(s);else if(['CB','LB','RB'].includes(p))def.push(s);else if(['CM','CDM','CAM'].includes(p))mid.push(s);else att.push(s);});
+  function zone(label,slots){
+    if(!slots.length) return '';
+    let h=`<div><div class="pitch-zone-label">${label}</div><div class="pitch-zone">`;
+    slots.forEach(s=>{
+      const pl=team.slots[s.idx];
+      if(pl){
+        const ln=pl.name.split(' ').pop();
+        // Tier colour map for revealed pts badge
+        const tierColor = {S:'var(--gold)',A:'#4ade80',B:'#93c5fd'};
+        const tc = tierColor[pl.tier]||'var(--text2)';
+        // Points: hidden (?) while building, animated reveal once complete
+        const ptsHtml = team.complete
+          ? `<div class="slot-pts pts-revealed" style="color:${tc};font-size:10px;font-weight:700;animation:pts-pop .35s ease both;animation-delay:${s.idx*0.06}s">${pl.pts}p</div>`
+          : `<div class="slot-pts" style="color:var(--text3);font-size:10px">?p</div>`;
+        const cursor = team.complete ? 'default' : `openModal(${s.idx},'${s.pos}')`;
+        h+=`<div class="position-slot filled" onclick="${team.complete?'':cursor}" style="${team.complete?'cursor:default;':''}">
+          ${photoEl(pl.name,'slot-photo')}
+          <div class="slot-pos">${s.pos}</div>
+          <div class="slot-name" title="${pl.name}">${ln}</div>
+          ${ptsHtml}
+        </div>`;
+      } else {
+        h+=`<div class="position-slot" onclick="openModal(${s.idx},'${s.pos}')"><div class="slot-empty-icon">+</div><div class="slot-pos">${s.pos}</div></div>`;
+      }
+    });
+    return h+'</div></div>';
+  }
+  zones.innerHTML=zone('⚡ Atak',att)+zone('🔄 Pomoc',mid)+zone('🛡 Obrona',def)+zone('🥅 Bramka',gk);
+  hydrate(zones);
+}
+
+function updateScore(){
+  const team=curTeam();
+  let score=0,filled=0;
+  Object.values(team.slots).forEach(p=>{if(p){score+=p.pts;filled++;}});
+  const total=team.formation?FORMATIONS[team.formation].length:11;
+  document.getElementById('team-filled').textContent=`${filled}/${total} graczy`;
+  const el=document.getElementById('team-score');
+  if(team.complete){
+    el.textContent=score;
+    el.style.animation='none';
+    requestAnimationFrame(()=>{ el.style.animation='score-count .5s ease both'; });
+  } else {
+    el.textContent='?';
+    el.style.animation='none';
+  }
+  const pct=Math.round((filled/total)*100);
+  document.getElementById('progress-fill').style.width=pct+'%';
+  document.getElementById('progress-label').textContent=pct+'%';
+}
+
+function renderLeaderboard(){
+  const sorted=[...G.managers].sort((a,b)=>b.teams.reduce((x,t)=>x+t.score,0)-a.teams.reduce((x,t)=>x+t.score,0));
+  document.getElementById('leaderboard').innerHTML=sorted.map((m,i)=>{
+    const pts=m.teams.reduce((x,t)=>x+t.score,0);
+    const done=m.teams.filter(t=>t.complete).length;
+    return `<div class="lb-row${m.idx===G.currentMgr?' current-player':''}"><div class="lb-rank r${i+1}">${i+1}</div><div style="flex:1"><div class="lb-name">${m.name}</div><div class="lb-teams">${done}/5 drużyn</div></div><div class="lb-pts">${pts}</div></div>`;
+  }).join('');
+}
+
+function updateButtons(){
+  const team=curTeam();
+  // Hide next-team button entirely — alternating flow handles progression
+  document.getElementById('btn-next-team').style.display='none';
+  if(!team.formation){
+    document.getElementById('btn-save-team').style.display='none';
+    document.getElementById('btn-finish-mgr').style.display='none';
+    return;
+  }
+  const total=FORMATIONS[team.formation].length;
+  const filled=Object.keys(team.slots).length;
+  document.getElementById('btn-save-team').style.display=(filled===total&&!team.complete)?'':'none';
+  document.getElementById('btn-finish-mgr').style.display=team.complete?'':'none';
+  // Update button label based on context
+  const finBtn=document.getElementById('btn-finish-mgr');
+  const isLastMgr=(G.currentMgr===G.managers.length-1);
+  const isLastRound=(G.currentRound===4);
+  if(isLastMgr&&isLastRound) finBtn.textContent='Zakończ grę 🏆';
+  else if(isLastMgr) finBtn.textContent=`Runda ${G.currentRound+2}/5 →`;
+  else finBtn.textContent=`Oddaj turę → ${G.managers[G.currentMgr+1]?.name||''}`;
+}
+
+let modalSlot=null,modalPos=null;
+function openModal(slotIdx,pos){
+  const team=curTeam();
+  if(team.complete) return;
+  sfxOpenModal();
+  modalSlot=slotIdx;modalPos=pos;
+  document.getElementById('modal-title').textContent=`Wybierz: ${pos}`;
+  document.getElementById('modal-search-input').value='';
+  renderPlayerList(pos,'');
+  document.getElementById('player-modal').style.display='flex';
+}
+function closeModal(){ sfxClick(); document.getElementById('player-modal').style.display='none';}
+function closeModalOutside(e){if(e.target.id==='player-modal')closeModal();}
+function filterPlayers(){renderPlayerList(modalPos,document.getElementById('modal-search-input').value);}
+
+function renderPlayerList(pos,search){
+  const pool=(PLAYERS[pos]||[]).filter(p=>{
+    if(!search) return true;
+    const q=search.toLowerCase();
+    return p.name.toLowerCase().includes(q)||p.club.toLowerCase().includes(q);
+  }).sort((a,b)=>b.pts-a.pts);
+  const c=document.getElementById('player-list');
+  if(!pool.length){c.innerHTML='<div style="text-align:center;padding:30px;color:var(--text3);">Brak wyników</div>';return;}
+  c.innerHTML=pool.map(p=>{
+    const taken=G.takenPlayers[p.name+pos];
+    const safe=p.name.replace(/'/g,"\\'").replace(/"/g,'&quot;');
+    const safeC=p.club.replace(/'/g,"\\'");
+    // Points HIDDEN during selection — only tier badge shown
+    return `<div class="player-item${taken?' taken':''}" onclick="${taken?'':(`pickPlayer('${safe}','${safeC}',${p.pts},'${p.tier}','${pos}')`)}">
+      ${photoEl(p.name,'pl-photo')}
+      <div class="player-info"><strong>${p.name}</strong><span>${p.club} · <span class="tier-badge tier-${p.tier}">${p.tier}</span></span></div>
+      <div class="player-pts">
+        <strong style="font-size:13px;color:var(--text3)">???</strong>
+        <span>${taken?'zajęty':'pkt'}</span>
+      </div>
+    </div>`;
+  }).join('');
+  hydrate(c);
+}
+
+function pickPlayer(name,club,pts,tier,pos){
+  sfxPickPlayer();
+  const team=curTeam();
+  if(team.slots[modalSlot]) delete G.takenPlayers[team.slots[modalSlot].name+pos];
+  team.slots[modalSlot]={name,club,pts,tier};
+  G.takenPlayers[name+pos]=true;
+  closeModal();
+  showToast(`✓ ${name} dodany`,'success');  // no points revealed here
+  renderGame();
+}
+
+function pickFormation(f){
+  const team=curTeam();
+  if(team.complete) return;
+  team.formation=f;
+  document.querySelectorAll('.form-btn').forEach(b=>b.classList.toggle('selected',b.textContent===f));
+  renderGame();
+}
+
+function saveTeam(){
+  const team=curTeam();
+  const total=FORMATIONS[team.formation].length;
+  if(Object.keys(team.slots).length<total){sfxError();showToast('Uzupełnij wszystkie pozycje!','error');return;}
+  sfxSaveTeam();
+  team.score=Object.values(team.slots).reduce((s,p)=>s+p.pts,0);
+  team.complete=true;
+  showToast(`🏆 Drużyna ${G.currentRound+1} zapisana! ${team.score} pkt`,'success');
+  renderGame();
+}
+
+function nextTeam(){ sfxNextTeam(); renderGame(); } // kept for compat, unused in new flow
+
+function finishManager(){
+  const team=curTeam();
+  if(!team.complete){sfxError();showToast('Najpierw zapisz drużynę!','error');return;}
+  sfxFinishTurn();
+  // Advance to next manager in same round
+  G.currentMgr++;
+  if(G.currentMgr >= G.managers.length){
+    // All managers finished this round → next round
+    G.currentRound++;
+    G.currentMgr=0;
+    if(G.currentRound >= 5){
+      showResults();
+      return;
+    }
+    showToast(`🔄 Runda ${G.currentRound+1}/5 — zaczyna ${G.managers[0].name}`,'success');
+  } else {
+    showToast(`Tura dla: ${G.managers[G.currentMgr].name}`,'success');
+  }
+  renderGame();
+}
+
+function confirmEnd(){if(confirm('Zakończyć i zobaczyć wyniki?'))showResults();}
+
+function showResults(){
+  const sorted=[...G.managers].sort((a,b)=>b.teams.reduce((x,t)=>x+t.score,0)-a.teams.reduce((x,t)=>x+t.score,0));
+  const w=sorted[0];
+  document.getElementById('winner-name').textContent=w.name;
+  document.getElementById('winner-score').textContent=w.teams.reduce((x,t)=>x+t.score,0)+' PKT';
+  document.getElementById('final-table').innerHTML='<div style="display:flex;flex-direction:column;gap:10px;">'+
+    sorted.map((m,i)=>{
+      const pts=m.teams.reduce((x,t)=>x+t.score,0);
+      const best=Math.max(...m.teams.map(t=>t.score));
+      const medals=['🥇','🥈','🥉','4️⃣','5️⃣'];
+      return `<div class="card card-sm" style="display:flex;align-items:center;gap:14px;${i===0?'border-color:var(--gold);':''}">
+        <span style="font-size:24px;">${medals[i]||''}</span>
+        <div style="flex:1"><div style="font-weight:700;font-size:16px;">${m.name}</div><div style="font-size:12px;color:var(--text2);margin-top:2px;">Najlepsza drużyna: ${best} pkt</div></div>
+        <div style="font-family:var(--font-display);font-size:26px;color:${i===0?'var(--gold)':'var(--text2)'};">${pts}</div>
+      </div>`;
+    }).join('')+'</div>';
+  showScreen('results');
+}
+
+function resetGame(){
+  G={numManagers:5,managers:[],currentMgr:0,currentRound:0,takenPlayers:{},phase:'setup'};
+  selectedCount=5;
+  showScreen('welcome');
+}
+
+let toastTimer;
+function showToast(msg,type=''){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.className='toast show '+(type||'');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove('show'),2800);
+}
+
+renderNameInputs(5);
+setTimeout(()=>preloadAll(), 1000);
+
+// ═══════════════════════════════════════════════════════
+// SOUND ENGINE — Web Audio API, zero external files
+// ═══════════════════════════════════════════════════════
+let _actx = null;
+let _muted = false;
+
+function getCtx(){
+  if(!_actx) _actx = new (window.AudioContext||window.webkitAudioContext)();
+  if(_actx.state==='suspended') _actx.resume();
+  return _actx;
+}
+
+function playTone(opts){
+  if(_muted) return;
+  try{
+    const ctx = getCtx();
+    const { type='sine', freq=440, freq2=freq, duration=0.18,
+            gain=0.22, gainEnd=0.0001, attack=0.008, decay=0.05,
+            detune=0, delay=0, filter=null, filterQ=1, noise=false } = opts;
+
+    const osc = ctx.createOscillator();
+    const gainNode = ctx.createGain();
+
+    let node = osc;
+
+    if(filter){
+      const f = ctx.createBiquadFilter();
+      f.type = filter;
+      f.frequency.value = freq * 2;
+      f.Q.value = filterQ;
+      osc.connect(f);
+      f.connect(gainNode);
+    } else {
+      osc.connect(gainNode);
+    }
+    gainNode.connect(ctx.destination);
+
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, ctx.currentTime + delay);
+    if(freq2 !== freq) osc.frequency.exponentialRampToValueAtTime(freq2, ctx.currentTime + delay + duration);
+    if(detune) osc.detune.value = detune;
+
+    gainNode.gain.setValueAtTime(0.0001, ctx.currentTime + delay);
+    gainNode.gain.linearRampToValueAtTime(gain, ctx.currentTime + delay + attack);
+    gainNode.gain.exponentialRampToValueAtTime(gainEnd, ctx.currentTime + delay + duration);
+
+    osc.start(ctx.currentTime + delay);
+    osc.stop(ctx.currentTime + delay + duration + 0.02);
+  }catch(e){}
+}
+
+function playNoise(opts){
+  if(_muted) return;
+  try{
+    const ctx = getCtx();
+    const { duration=0.1, gain=0.15, gainEnd=0.0001, freq=2000, type='bandpass', Q=4, delay=0 } = opts;
+    const bufSize = ctx.sampleRate * duration;
+    const buf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
+    const data = buf.getChannelData(0);
+    for(let i=0;i<bufSize;i++) data[i] = Math.random()*2-1;
+    const src = ctx.createBufferSource();
+    src.buffer = buf;
+    const f = ctx.createBiquadFilter();
+    f.type = type; f.frequency.value = freq; f.Q.value = Q;
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(gain, ctx.currentTime+delay);
+    g.gain.exponentialRampToValueAtTime(gainEnd, ctx.currentTime+delay+duration);
+    src.connect(f); f.connect(g); g.connect(ctx.destination);
+    src.start(ctx.currentTime+delay);
+  }catch(e){}
+}
+
+// ── Named sounds ──────────────────────────────────────
+
+// Soft UI click — tap a slot or button
+const sfxClick = () => {
+  playTone({type:'sine', freq:680, freq2:520, duration:0.09, gain:0.14, attack:0.004, decay:0.03});
+};
+
+// Open modal — airy woosh
+const sfxOpenModal = () => {
+  playTone({type:'sine', freq:320, freq2:640, duration:0.22, gain:0.18, attack:0.01, filter:'highpass', filterQ:2});
+  playTone({type:'triangle', freq:800, freq2:1200, duration:0.15, gain:0.08, attack:0.005, delay:0.04});
+};
+
+// Pick a player — satisfying "ding" chord
+const sfxPickPlayer = () => {
+  playTone({type:'sine', freq:523, duration:0.3, gain:0.26, attack:0.005});         // C5
+  playTone({type:'sine', freq:659, duration:0.28, gain:0.18, attack:0.005, delay:0.03}); // E5
+  playTone({type:'sine', freq:784, duration:0.25, gain:0.14, attack:0.005, delay:0.06}); // G5
+  playNoise({freq:3000, Q:6, duration:0.06, gain:0.1});
+};
+
+// Formation selected — mechanical click + low thud
+const sfxFormation = () => {
+  playTone({type:'square', freq:180, freq2:90, duration:0.12, gain:0.2, attack:0.003, filter:'lowpass', filterQ:3});
+  playNoise({freq:800, Q:2, duration:0.08, gain:0.18});
+};
+
+// Save team — mini fanfare
+const sfxSaveTeam = () => {
+  const notes = [{f:523,d:0},{f:659,d:0.08},{f:784,d:0.16},{f:1047,d:0.26}];
+  notes.forEach(n=>playTone({type:'triangle', freq:n.f, duration:0.28, gain:0.22, attack:0.006, gainEnd:0.0001, delay:n.d}));
+  playTone({type:'sine', freq:1047, freq2:1200, duration:0.4, gain:0.12, attack:0.01, delay:0.36});
+  playNoise({freq:2000, Q:3, duration:0.15, gain:0.12, delay:0.26});
+};
+
+// Next team — cheerful two-tone
+const sfxNextTeam = () => {
+  playTone({type:'sine', freq:660, duration:0.14, gain:0.2, attack:0.005});
+  playTone({type:'sine', freq:880, duration:0.18, gain:0.2, attack:0.005, delay:0.1});
+};
+
+// Finish manager turn — crowd-like burst
+const sfxFinishTurn = () => {
+  playTone({type:'sawtooth', freq:220, freq2:440, duration:0.35, gain:0.14, attack:0.01, filter:'lowpass', filterQ:2});
+  playTone({type:'sine', freq:440, freq2:660, duration:0.3, gain:0.18, attack:0.01, delay:0.05});
+  playTone({type:'triangle', freq:880, duration:0.25, gain:0.15, attack:0.008, delay:0.12});
+  playNoise({freq:1500, Q:1.5, duration:0.4, gain:0.2, delay:0.02});
+};
+
+// Error / taken player
+const sfxError = () => {
+  playTone({type:'square', freq:200, freq2:140, duration:0.18, gain:0.2, attack:0.004, filter:'lowpass', filterQ:2});
+  playTone({type:'square', freq:160, freq2:100, duration:0.16, gain:0.15, attack:0.004, delay:0.1});
+};
+
+// Start game — dramatic build
+const sfxStartGame = () => {
+  playNoise({freq:600, Q:1, duration:0.5, gain:0.22});
+  [196,247,294,370].forEach((f,i)=>
+    playTone({type:'sawtooth', freq:f, freq2:f*1.5, duration:0.35, gain:0.16, attack:0.01, delay:i*0.08, filter:'lowpass', filterQ:3})
+  );
+  playTone({type:'triangle', freq:740, duration:0.6, gain:0.22, attack:0.02, delay:0.32});
+};
+
+// Victory fanfare
+const sfxVictory = () => {
+  const seq = [523,659,784,1047,784,1047,1319];
+  const durs = [0.14,0.12,0.12,0.22,0.1,0.1,0.5];
+  let t=0;
+  seq.forEach((f,i)=>{
+    playTone({type:'triangle', freq:f, duration:durs[i]+0.1, gain:0.24, attack:0.005, delay:t});
+    playTone({type:'sine', freq:f*1.5, duration:durs[i], gain:0.1, attack:0.005, delay:t});
+    t+=durs[i];
+  });
+  playNoise({freq:2500, Q:2, duration:0.2, gain:0.18, delay:t-0.2});
+};
+
+// Button hover tick
+const sfxHover = () => {
+  playTone({type:'sine', freq:900, freq2:750, duration:0.05, gain:0.07, attack:0.002});
+};
+
+// Tab switch
+const sfxTab = () => {
+  playTone({type:'sine', freq:540, freq2:620, duration:0.08, gain:0.12, attack:0.003});
+};
+
+// Count button (setup)
+const sfxCount = () => {
+  playTone({type:'triangle', freq:400, freq2:500, duration:0.1, gain:0.16, attack:0.004});
+};
+
+// Screen transition
+const sfxTransition = () => {
+  playTone({type:'sine', freq:300, freq2:600, duration:0.2, gain:0.15, attack:0.01, filter:'highpass'});
+};
+
+// ── Mute toggle ───────────────────────────────────────
+function toggleMute(){
+  _muted = !_muted;
+  document.querySelectorAll('.mute-btn-el').forEach(b=>{
+    b.textContent = _muted ? '🔇' : '🔊';
+    b.title = _muted ? 'Włącz dźwięk' : 'Wycisz';
+  });
+  if(!_muted) playTone({type:'sine', freq:660, duration:0.12, gain:0.2, attack:0.005});
+}
+
+// ── Inject mute button into all headers ───────────────
+function injectMuteBtns(){
+  document.querySelectorAll('.header').forEach(h=>{
+    if(h.querySelector('.mute-btn-el')) return;
+    const b = document.createElement('button');
+    b.className = 'btn btn-ghost btn-sm mute-btn-el';
+    b.textContent = '🔊'; b.title = 'Wycisz';
+    b.style.cssText = 'padding:8px 10px;font-size:16px;min-width:40px;';
+    b.addEventListener('click', toggleMute);
+    h.insertBefore(b, h.lastElementChild);
+  });
+}
+injectMuteBtns();
+
+// ═══════════════════════════════════════════════════════
+// 🎵 BACKGROUND MUSIC ENGINE — Football Stadium Theme
+// Procedural sequencer, Web Audio API, zero external files
+// Inspired by Champions League / epic football anthems
+// ═══════════════════════════════════════════════════════
+
+let _mxCtx = null;
+let _mxPlaying = false;
+let _mxLoopId = null;
+let _mxNextBarTime = 0;
+let _mxMasterGain = null;
+const _LOOKAHEAD = 0.12;   // seconds ahead to schedule
+const _SCHEDINT  = 80;     // ms between scheduler ticks
+
+// ── Tuning ───────────────────────────────────────────
+const BPM  = 118;
+const BEAT = 60 / BPM;          // one quarter note
+const BAR  = BEAT * 4;          // 4/4 time
+const BARS = 8;                 // loop length in bars
+const LOOP = BAR * BARS;        // total loop duration
+
+// Frequencies (Hz) — E minor palette, heroic/dramatic
+const N = {
+  E2:82.41, B2:123.47, E3:164.81, G3:196.00, A3:220.00,
+  B3:246.94, C4:261.63, D4:293.66, E4:329.63, F4:349.23,
+  G4:392.00, A4:440.00, B4:493.88, D5:587.33, E5:659.25, G5:783.99
+};
+
+// ── Master gain ramp ─────────────────────────────────
+function getMxCtx(){
+  if(!_mxCtx){
+    _mxCtx = new (window.AudioContext||window.webkitAudioContext)();
+    _mxMasterGain = _mxCtx.createGain();
+    _mxMasterGain.gain.value = 0;
+    _mxMasterGain.connect(_mxCtx.destination);
+  }
+  if(_mxCtx.state==='suspended') _mxCtx.resume();
+  return _mxCtx;
+}
+
+// ── Low-level note scheduler ─────────────────────────
+function mxNote({freq, start, dur, gain=0.1, type='sine', atk=0.02, fType=null, fFreq=2000, fQ=1, detune=0}){
+  const ctx = getMxCtx();
+  const osc = ctx.createOscillator();
+  const g   = ctx.createGain();
+  osc.type = type;
+  osc.frequency.value = freq;
+  if(detune) osc.detune.value = detune;
+  if(fType){
+    const f = ctx.createBiquadFilter();
+    f.type = fType; f.frequency.value = fFreq; f.Q.value = fQ;
+    osc.connect(f); f.connect(g);
+  } else { osc.connect(g); }
+  g.connect(_mxMasterGain);
+  g.gain.setValueAtTime(0.0001, start);
+  g.gain.linearRampToValueAtTime(gain, start + atk);
+  g.gain.setValueAtTime(gain, start + dur - 0.04);
+  g.gain.exponentialRampToValueAtTime(0.0001, start + dur);
+  osc.start(start);
+  osc.stop(start + dur + 0.05);
+}
+
+function mxNoise({start, dur, gain=0.08, fFreq=2000, fType='bandpass', fQ=4}){
+  const ctx  = getMxCtx();
+  const size = Math.ceil(ctx.sampleRate * dur);
+  const buf  = ctx.createBuffer(1, size, ctx.sampleRate);
+  const data = buf.getChannelData(0);
+  for(let i=0;i<size;i++) data[i]=Math.random()*2-1;
+  const src = ctx.createBufferSource();
+  src.buffer = buf;
+  const f = ctx.createBiquadFilter();
+  f.type=fType; f.frequency.value=fFreq; f.Q.value=fQ;
+  const g = ctx.createGain();
+  g.gain.setValueAtTime(gain, start);
+  g.gain.exponentialRampToValueAtTime(0.0001, start+dur);
+  src.connect(f); f.connect(g); g.connect(_mxMasterGain);
+  src.start(start);
+}
+
+// ── Drum voices ──────────────────────────────────────
+function mxKick(t){
+  const ctx=getMxCtx();
+  const osc=ctx.createOscillator(), g=ctx.createGain();
+  osc.connect(g); g.connect(_mxMasterGain);
+  osc.frequency.setValueAtTime(180,t);
+  osc.frequency.exponentialRampToValueAtTime(38,t+0.18);
+  g.gain.setValueAtTime(0.38,t);
+  g.gain.exponentialRampToValueAtTime(0.0001,t+0.22);
+  osc.start(t); osc.stop(t+0.26);
+}
+function mxSnare(t){
+  mxNoise({start:t, dur:0.13, gain:0.22, fFreq:2400, fType:'bandpass', fQ:0.9});
+  // body tone
+  const ctx=getMxCtx();
+  const osc=ctx.createOscillator(), g=ctx.createGain();
+  osc.type='triangle'; osc.frequency.value=200;
+  osc.connect(g); g.connect(_mxMasterGain);
+  g.gain.setValueAtTime(0.1,t); g.gain.exponentialRampToValueAtTime(0.0001,t+0.08);
+  osc.start(t); osc.stop(t+0.1);
+}
+function mxHat(t, open=false){
+  mxNoise({start:t, dur:open?0.18:0.04, gain:0.07, fFreq:9000, fType:'highpass', fQ:1});
+}
+function mxClap(t){
+  // layered noise bursts for stadium clap feel
+  [0,0.01,0.02].forEach(d=>mxNoise({start:t+d, dur:0.06, gain:0.14, fFreq:1800, fType:'bandpass', fQ:1.2}));
+}
+
+// ── Chord pad ────────────────────────────────────────
+function mxPad(freqs, t, dur, gain=0.04){
+  freqs.forEach((f,i)=>mxNote({freq:f, start:t, dur, gain, type:'triangle', atk:0.12, detune:i*4}));
+}
+
+// ── Song structure — 8-bar loop ──────────────────────
+//  Bar 1-2: E minor build (Em)
+//  Bar 3-4: C major lift (C)
+//  Bar 5-6: G major (G)
+//  Bar 7-8: B / B7 return (tension → resolve)
+
+const CHORD_PROG = [
+  // [bar, pad freqs]
+  [0, [N.E3, N.B3, N.E4, N.G4]],          // Em
+  [2, [N.C4, N.E4, N.G4]],                 // C
+  [4, [N.G3, N.B3, N.D4, N.G4]],           // G
+  [6, [N.B2, N.D4, N.F4, N.A4]],           // Bm
+];
+
+// Melody — heroic motif (8 bars × 4 beats = beat indices 0-31)
+const MELODY_SEQ = [
+  // bar 1
+  {bt:0,  f:N.E4, d:BEAT*0.9, g:0.11},
+  {bt:0.5,f:N.G4, d:BEAT*0.5, g:0.09},
+  {bt:1,  f:N.B4, d:BEAT*1.7, g:0.13},
+  {bt:3,  f:N.A4, d:BEAT*0.8, g:0.10},
+  // bar 2
+  {bt:4,  f:N.G4, d:BEAT*1.8, g:0.12},
+  {bt:6,  f:N.E4, d:BEAT*0.8, g:0.10},
+  {bt:7,  f:N.D4, d:BEAT*0.9, g:0.09},
+  // bar 3
+  {bt:8,  f:N.E4, d:BEAT*0.5, g:0.11},
+  {bt:8.5,f:N.G4, d:BEAT*0.5, g:0.10},
+  {bt:9,  f:N.A4, d:BEAT*0.5, g:0.10},
+  {bt:9.5,f:N.B4, d:BEAT*0.5, g:0.11},
+  {bt:10, f:N.E5, d:BEAT*1.8, g:0.14},
+  {bt:12, f:N.D5, d:BEAT*0.9, g:0.11},
+  // bar 4
+  {bt:13, f:N.B4, d:BEAT*0.9, g:0.10},
+  {bt:14, f:N.G4, d:BEAT*1.9, g:0.12},
+  // bar 5
+  {bt:16, f:N.G4, d:BEAT*0.5, g:0.10},
+  {bt:16.5,f:N.B4,d:BEAT*0.5, g:0.10},
+  {bt:17, f:N.D5, d:BEAT*1.8, g:0.13},
+  {bt:19, f:N.B4, d:BEAT*0.9, g:0.10},
+  // bar 6
+  {bt:20, f:N.A4, d:BEAT*1.8, g:0.12},
+  {bt:22, f:N.G4, d:BEAT*1.8, g:0.11},
+  // bar 7
+  {bt:24, f:N.B4, d:BEAT*0.5, g:0.12},
+  {bt:24.5,f:N.A4,d:BEAT*0.4, g:0.10},
+  {bt:25, f:N.G4, d:BEAT*0.5, g:0.10},
+  {bt:25.5,f:N.E4,d:BEAT*0.4, g:0.09},
+  {bt:26, f:N.F4, d:BEAT*1.8, g:0.13},
+  {bt:28, f:N.E4, d:BEAT*0.9, g:0.10},
+  // bar 8
+  {bt:29, f:N.B3, d:BEAT*0.8, g:0.09},
+  {bt:30, f:N.E4, d:BEAT*1.9, g:0.14},
+];
+
+// Bass line — steady quarter notes with accents
+const BASS_SEQ = [
+  {bt:0,  f:N.E2, d:BEAT*0.7, g:0.19},
+  {bt:1,  f:N.E2, d:BEAT*0.5, g:0.14},
+  {bt:2,  f:N.B2, d:BEAT*0.7, g:0.16},
+  {bt:3,  f:N.G3, d:BEAT*0.5, g:0.13},
+  {bt:4,  f:N.E2, d:BEAT*0.7, g:0.19},
+  {bt:5,  f:N.E2, d:BEAT*0.5, g:0.14},
+  {bt:6,  f:N.D4, d:BEAT*0.6, g:0.15},
+  {bt:7,  f:N.B2, d:BEAT*0.5, g:0.13},
+  {bt:8,  f:N.A3, d:BEAT*0.7, g:0.18},
+  {bt:9,  f:N.A3, d:BEAT*0.5, g:0.13},
+  {bt:10, f:N.E3, d:BEAT*0.6, g:0.16},
+  {bt:11, f:N.C4, d:BEAT*0.5, g:0.13},
+  {bt:12, f:N.A3, d:BEAT*0.7, g:0.17},
+  {bt:13, f:N.G3, d:BEAT*0.5, g:0.13},
+  {bt:14, f:N.E3, d:BEAT*0.6, g:0.15},
+  {bt:15, f:N.D4, d:BEAT*0.5, g:0.13},
+  {bt:16, f:N.G3, d:BEAT*0.7, g:0.18},
+  {bt:17, f:N.G3, d:BEAT*0.5, g:0.13},
+  {bt:18, f:N.B2, d:BEAT*0.6, g:0.16},
+  {bt:19, f:N.D4, d:BEAT*0.5, g:0.13},
+  {bt:20, f:N.G3, d:BEAT*0.7, g:0.17},
+  {bt:21, f:N.A3, d:BEAT*0.5, g:0.13},
+  {bt:22, f:N.B2, d:BEAT*0.6, g:0.15},
+  {bt:23, f:N.G3, d:BEAT*0.5, g:0.12},
+  {bt:24, f:N.B2, d:BEAT*0.7, g:0.18},
+  {bt:25, f:N.B2, d:BEAT*0.5, g:0.13},
+  {bt:26, f:N.F4, d:BEAT*0.6, g:0.16},
+  {bt:27, f:N.A3, d:BEAT*0.5, g:0.13},
+  {bt:28, f:N.B2, d:BEAT*0.7, g:0.17},
+  {bt:29, f:N.G3, d:BEAT*0.5, g:0.12},
+  {bt:30, f:N.E2, d:BEAT*1.4, g:0.20},
+];
+
+// Drum pattern per bar (repeats)
+// kick on 1,3 / snare on 2,4 / hats on 8ths
+function scheduleDrumBar(barStart){
+  const b = BEAT;
+  // kicks
+  [0, 2, 2.5].forEach(off => mxKick(barStart + off*b));
+  // snares / claps
+  [1, 3].forEach(off => mxSnare(barStart + off*b));
+  [1, 3].forEach(off => mxClap(barStart + off*b + 0.01));
+  // hi-hats (8th notes)
+  for(let i=0;i<8;i++) mxHat(barStart + i*b*0.5, i===3||i===7);
+}
+
+// ── Schedule one full loop starting at t ─────────────
+function scheduleLoop(t){
+  const ctx = getMxCtx();
+
+  // Drums — every bar
+  for(let bar=0; bar<BARS; bar++) scheduleDrumBar(t + bar*BAR);
+
+  // Chord pads
+  CHORD_PROG.forEach(([bar, freqs]) => mxPad(freqs, t+bar*BAR, BAR*2-0.1));
+
+  // Melody
+  MELODY_SEQ.forEach(s => mxNote({
+    freq:s.f, start:t+s.bt*BEAT, dur:s.d, gain:s.g,
+    type:'triangle', atk:0.025,
+    fType:'lowpass', fFreq:3000, fQ:1
+  }));
+  // Harmony layer (octave below, softer)
+  MELODY_SEQ.forEach(s => mxNote({
+    freq:s.f*0.5, start:t+s.bt*BEAT+0.01, dur:s.d*0.8, gain:s.g*0.4,
+    type:'sine', atk:0.04
+  }));
+
+  // Bass
+  BASS_SEQ.forEach(s => mxNote({
+    freq:s.f, start:t+s.bt*BEAT, dur:s.d, gain:s.g,
+    type:'sawtooth', atk:0.015,
+    fType:'lowpass', fFreq:600, fQ:1.2
+  }));
+
+  // Crowd ambience — soft noise swell on bar 4 & 8
+  [3,7].forEach(bar => mxNoise({
+    start:t+bar*BAR+BAR*0.5, dur:BAR*1.2,
+    gain:0.04, fFreq:800, fType:'bandpass', fQ:0.4
+  }));
+}
+
+// ── Scheduler tick ────────────────────────────────────
+function mxSchedulerTick(){
+  const ctx = getMxCtx();
+  // Schedule the next loop if it falls within look-ahead window
+  while(_mxNextBarTime < ctx.currentTime + _LOOKAHEAD + LOOP){
+    scheduleLoop(_mxNextBarTime);
+    _mxNextBarTime += LOOP;
+  }
+  _mxLoopId = setTimeout(mxSchedulerTick, _SCHEDINT);
+}
+
+// ── Start / Stop ─────────────────────────────────────
+function startMusic(){
+  const ctx = getMxCtx();
+  _mxNextBarTime = ctx.currentTime + 0.15;
+  _mxMasterGain.gain.cancelScheduledValues(ctx.currentTime);
+  _mxMasterGain.gain.setValueAtTime(0, ctx.currentTime);
+  _mxMasterGain.gain.linearRampToValueAtTime(0.55, ctx.currentTime + 2.5);
+  _mxPlaying = true;
+  mxSchedulerTick();
+}
+function stopMusic(){
+  clearTimeout(_mxLoopId);
+  _mxPlaying = false;
+  const ctx = getMxCtx();
+  _mxMasterGain.gain.cancelScheduledValues(ctx.currentTime);
+  _mxMasterGain.gain.setValueAtTime(_mxMasterGain.gain.value, ctx.currentTime);
+  _mxMasterGain.gain.linearRampToValueAtTime(0, ctx.currentTime + 1.2);
+}
+function toggleMusic(){
+  if(_mxPlaying){ stopMusic(); } else { startMusic(); }
+  document.querySelectorAll('.music-btn-el').forEach(b=>{
+    b.textContent = _mxPlaying ? '🎵' : '🎵';
+    b.title       = _mxPlaying ? 'Zatrzymaj muzykę' : 'Włącz muzykę';
+    b.style.opacity = _mxPlaying ? '1' : '0.45';
+  });
+}
+
+// ── Inject music button into all headers ──────────────
+function injectMusicBtns(){
+  document.querySelectorAll('.header').forEach(h=>{
+    if(h.querySelector('.music-btn-el')) return;
+    const b = document.createElement('button');
+    b.className = 'btn btn-ghost btn-sm music-btn-el';
+    b.textContent = '🎵'; b.title = 'Włącz muzykę';
+    b.style.cssText = 'padding:8px 10px;font-size:16px;min-width:40px;opacity:0.45;';
+    b.addEventListener('click', toggleMusic);
+    h.insertBefore(b, h.lastElementChild);
+  });
+}
+injectMusicBtns();
+
+// ── Mobile section toggle ─────────────────────────────
+function mobToggle(id){
+  const el=document.getElementById(id);
+  if(el) el.classList.toggle('open');
+}
+
+// Update mobile teams badge
+function updateMobBadge(){
+  const b=document.getElementById('mob-teams-badge');
+  if(b) b.textContent=`T${G.currentRound+1}`;
+}
+
+// ── Global delegated click/hover handler ──────────────
+document.addEventListener('click', function(e){
+  const t = e.target;
+  if(!(t instanceof Element)) return; // guard: text nodes have no .closest()
+  // Slot on pitch
+  if(t.closest('.position-slot')) { sfxClick(); return; }
+  // Player item in modal
+  if(t.closest('.player-item') && !t.closest('.player-item.taken')) { return; } // sound fires in pickPlayer
+  // Tab switch
+  if(t.classList.contains('team-tab')) { sfxTab(); return; }
+  // Formation button
+  if(t.classList.contains('form-btn')) { sfxFormation(); return; }
+  // Count button
+  if(t.classList.contains('count-btn')) { sfxCount(); return; }
+  // Generic btn-ghost / close
+  if(t.classList.contains('btn-ghost') && !t.classList.contains('mute-btn-el')) { sfxClick(); return; }
+}, true); // capture phase so it fires before onclick
+
+document.addEventListener('mouseenter', function(e){
+  const t = e.target;
+  if(!(t instanceof Element)) return; // guard: text/SVG nodes have no .matches()
+  if(t.matches('.btn-primary,.btn-secondary,.btn-gold')) sfxHover();
+  if(t.matches('.player-item:not(.taken)')) playTone({type:'sine',freq:700,freq2:620,duration:0.04,gain:0.06,attack:0.002});
+  if(t.closest('.position-slot')) playTone({type:'sine',freq:500,freq2:580,duration:0.04,gain:0.05,attack:0.002});
+}, true);
+
+</script>
+</body>
+</html>
